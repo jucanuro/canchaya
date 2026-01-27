@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Premium -->
+        <div class="text-center mb-12">
+            <div class="inline-block mb-4">
+                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                    <span class="text-sm font-semibold text-emerald-400">Sistema de Reservas</span>
+                </span>
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
+                Registra tu Cancha
+            </h1>
+            <p class="text-lg text-slate-400 max-w-2xl mx-auto">
+                Configura tu cancha de fútbol con disponibilidad horaria inteligente. Soporta fútbol 5, 7 y 11.
+            </p>
+        </div>
+
+        <!-- Main Form Container -->
+        <form action="{% url 'registroCancha' %}" method="POST" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Card 1: Información Básica -->
+            <div class="bg-gradient-to-br from-slate-800/50 to-slate-700/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl hover:shadow-emerald-500/10 transition-all">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                        <span class="text-emerald-400 font-bold">1</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Información Básica</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Nombre -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>📍</span> Nombre de la Cancha
+                        </label>
+                        <input type="text" name="nombre" required placeholder="Ej: Cancha El Prado" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none">
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>📍</span> Ubicación
+                        </label>
+                        <input type="text" name="ubicacion" required placeholder="Ej: Av. Principal 123" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none">
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>📱</span> Teléfono de Contacto
+                        </label>
+                        <input type="tel" name="telefono" required placeholder="+34 600 123 456" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>✉️</span> Email
+                        </label>
+                        <input type="email" name="email" required placeholder="contacto@cancha.com" 
+                            class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none">
+                    </div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="space-y-2 mt-6">
+                    <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                        <span>📝</span> Descripción
+                    </label>
+                    <textarea name="descripcion" rows="4" required placeholder="Describe tu cancha: superficies, amenidades, estacionamiento, etc..." 
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Card 2: Tipo de Cancha -->
+            <div class="bg-gradient-to-br from-slate-800/50 to-slate-700/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl hover:shadow-emerald-500/10 transition-all">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                        <span class="text-cyan-400 font-bold">2</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Selecciona Tipos de Cancha</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Fútbol 5 -->
+                    <label class="group cursor-pointer">
+                        <input type="checkbox" name="tipo_cancha" value="futbol5" class="sr-only peer">
+                        <div class="p-6 rounded-xl border-2 border-slate-600/50 bg-slate-900/30 peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 transition-all hover:border-emerald-400/50">
+                            <div class="text-4xl mb-3">⚽</div>
+                            <h3 class="font-bold text-white mb-1 text-lg">Fútbol 5</h3>
+                            <p class="text-sm text-slate-400">5 jugadores por equipo</p>
+                            <div class="mt-4 h-1 bg-emerald-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform peer-checked:scale-x-100"></div>
+                        </div>
+                    </label>
+
+                    <!-- Fútbol 7 -->
+                    <label class="group cursor-pointer">
+                        <input type="checkbox" name="tipo_cancha" value="futbol7" class="sr-only peer">
+                        <div class="p-6 rounded-xl border-2 border-slate-600/50 bg-slate-900/30 peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 transition-all hover:border-cyan-400/50">
+                            <div class="text-4xl mb-3">🏟️</div>
+                            <h3 class="font-bold text-white mb-1 text-lg">Fútbol 7</h3>
+                            <p class="text-sm text-slate-400">7 jugadores por equipo</p>
+                            <div class="mt-4 h-1 bg-cyan-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform peer-checked:scale-x-100"></div>
+                        </div>
+                    </label>
+
+                    <!-- Fútbol 11 -->
+                    <label class="group cursor-pointer">
+                        <input type="checkbox" name="tipo_cancha" value="futbol11" class="sr-only peer">
+                        <div class="p-6 rounded-xl border-2 border-slate-600/50 bg-slate-900/30 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition-all hover:border-blue-400/50">
+                            <div class="text-4xl mb-3">🎯</div>
+                            <h3 class="font-bold text-white mb-1 text-lg">Fútbol 11</h3>
+                            <p class="text-sm text-slate-400">11 jugadores por equipo</p>
+                            <div class="mt-4 h-1 bg-blue-500 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform peer-checked:scale-x-100"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Card 3: Horarios Disponibles -->
+            <div class="bg-gradient-to-br from-slate-800/50 to-slate-700/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl hover:shadow-emerald-500/10 transition-all">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                        <span class="text-blue-400 font-bold">3</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Horarios Disponibles</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="text-sm text-slate-400 mb-6">Selecciona los días y horarios disponibles para tu cancha</div>
+                    
+                    <!-- Selector de Rango de Días -->
+                    <div class="space-y-4">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>📅</span> Rango de Días de Operación
+                        </label>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-300">Desde</label>
+                                <select id="dia-inicio" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none cursor-pointer">
+                                    <option value="">Selecciona día inicial</option>
+                                    <option value="lunes">📅 Lunes</option>
+                                    <option value="martes">📅 Martes</option>
+                                    <option value="miercoles">📅 Miércoles</option>
+                                    <option value="jueves">📅 Jueves</option>
+                                    <option value="viernes">🌅 Viernes</option>
+                                    <option value="sabado">🎉 Sábado</option>
+                                    <option value="domingo">☀️ Domingo</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-300">Hasta</label>
+                                <select id="dia-fin" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none cursor-pointer">
+                                    <option value="">Selecciona día final</option>
+                                    <option value="lunes">📅 Lunes</option>
+                                    <option value="martes">📅 Martes</option>
+                                    <option value="miercoles">📅 Miércoles</option>
+                                    <option value="jueves">📅 Jueves</option>
+                                    <option value="viernes">🌅 Viernes</option>
+                                    <option value="sabado">🎉 Sábado</option>
+                                    <option value="domingo">☀️ Domingo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Vista previa de días seleccionados -->
+                        <div class="bg-slate-900/60 rounded-xl p-4 border border-slate-700/50">
+                            <p class="text-xs font-semibold text-slate-400 mb-2">Días elegidos:</p>
+                            <div id="dias-preview" class="flex flex-wrap gap-2">
+                                <span class="text-slate-500 text-sm">Selecciona un rango de días</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selector de Rango de Horarios -->
+                    <div class="space-y-4 pt-4 border-t border-slate-700/50">
+                        <label class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span>⏰</span> Rango de Horarios
+                        </label>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-300">Abre desde</label>
+                                <select id="hora-inicio" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none cursor-pointer">
+                                    <option value="">Selecciona hora de apertura</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-sm font-semibold text-slate-300">Cierra hasta</label>
+                                <select id="hora-fin" class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none cursor-pointer">
+                                    <option value="">Selecciona hora de cierre</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Vista previa de horarios disponibles -->
+                        <div class="bg-slate-900/60 rounded-xl p-6 border border-slate-700/50">
+                            <h3 class="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+                                <span>🕐</span> Horarios Disponibles
+                            </h3>
+                            <div id="horarios-preview" class="flex flex-wrap gap-2">
+                                <span class="text-slate-500 text-sm">Selecciona rango de días y horarios</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input oculto para guardar datos -->
+                    <input type="hidden" name="horarios_disponibles" id="horarios-data" value="">
+                </div>
+
+                <!-- Script para generar selector de horarios -->
+                <script>
+                    const diasArray = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+                    const diasMap = {
+                        'lunes': '📅 Lunes',
+                        'martes': '📅 Martes',
+                        'miercoles': '📅 Miércoles',
+                        'jueves': '📅 Jueves',
+                        'viernes': '🌅 Viernes',
+                        'sabado': '🎉 Sábado',
+                        'domingo': '☀️ Domingo'
+                    };
+
+                    function generarHoras() {
+                        const horas = [];
+                        for (let i = 6; i <= 23; i++) {
+                            horas.push(`${String(i).padStart(2, '0')}:00`);
+                        }
+                        return horas;
+                    }
+
+                    const horas = generarHoras();
+                    const diaInicio = document.getElementById('dia-inicio');
+                    const diaFin = document.getElementById('dia-fin');
+                    const diasPreview = document.getElementById('dias-preview');
+                    const selectInicio = document.getElementById('hora-inicio');
+                    const selectFin = document.getElementById('hora-fin');
+                    const horariosPreview = document.getElementById('horarios-preview');
+                    const dataInput = document.getElementById('horarios-data');
+
+                    // Llenar selects de horas
+                    horas.forEach(hora => {
+                        const optionInicio = document.createElement('option');
+                        optionInicio.value = hora;
+                        optionInicio.textContent = hora;
+                        selectInicio.appendChild(optionInicio);
+
+                        const optionFin = document.createElement('option');
+                        optionFin.value = hora;
+                        optionFin.textContent = hora;
+                        selectFin.appendChild(optionFin);
+                    });
+
+                    // Actualizar vista previa de días
+                    function actualizarDiasPreview() {
+                        const inicio = diaInicio.value;
+                        const fin = diaFin.value;
+
+                        if (!inicio || !fin) {
+                            diasPreview.innerHTML = '<span class="text-slate-500 text-sm">Selecciona un rango de días</span>';
+                            actualizarPreviewCompleta();
+                            return;
+                        }
+
+                        const inicioIdx = diasArray.indexOf(inicio);
+                        const finIdx = diasArray.indexOf(fin);
+
+                        if (inicioIdx > finIdx) {
+                            diasPreview.innerHTML = '<span class="text-red-400 text-sm">⚠️ El día final debe ser igual o posterior al inicial</span>';
+                            actualizarPreviewCompleta();
+                            return;
+                        }
+
+                        let diasSeleccionados = [];
+                        for (let i = inicioIdx; i <= finIdx; i++) {
+                            diasSeleccionados.push(diasArray[i]);
+                        }
+
+                        diasPreview.innerHTML = diasSeleccionados.map(dia => 
+                            `<span class="px-3 py-2 bg-emerald-500/20 text-emerald-300 rounded-lg text-sm font-medium border border-emerald-500/30">${diasMap[dia]}</span>`
+                        ).join('');
+
+                        actualizarPreviewCompleta();
+                    }
+
+                    // Actualizar vista previa completa
+                    function actualizarPreviewCompleta() {
+                        const diaInicioVal = diaInicio.value;
+                        const diaFinVal = diaFin.value;
+                        const horaInicioVal = selectInicio.value;
+                        const horaFinVal = selectFin.value;
+
+                        if (!diaInicioVal || !diaFinVal || !horaInicioVal || !horaFinVal) {
+                            horariosPreview.innerHTML = '<span class="text-slate-500 text-sm">Selecciona rango de días y horarios</span>';
+                            dataInput.value = '';
+                            return;
+                        }
+
+                        const diaInicioIdx = diasArray.indexOf(diaInicioVal);
+                        const diaFinIdx = diasArray.indexOf(diaFinVal);
+
+                        if (diaInicioIdx > diaFinIdx) {
+                            horariosPreview.innerHTML = '<span class="text-red-400 text-sm">⚠️ El día final debe ser igual o posterior al inicial</span>';
+                            dataInput.value = '';
+                            return;
+                        }
+
+                        const horaInicioNum = parseInt(horaInicioVal.split(':')[0]);
+                        const horaFinNum = parseInt(horaFinVal.split(':')[0]);
+
+                        if (horaInicioNum >= horaFinNum) {
+                            horariosPreview.innerHTML = '<span class="text-red-400 text-sm">⚠️ La hora de cierre debe ser mayor que la de apertura</span>';
+                            dataInput.value = '';
+                            return;
+                        }
+
+                        let diasSeleccionados = [];
+                        for (let i = diaInicioIdx; i <= diaFinIdx; i++) {
+                            diasSeleccionados.push(diasArray[i]);
+                        }
+
+                        let horariosLista = [];
+                        let html = '';
+
+                        for (let i = horaInicioNum; i < horaFinNum; i++) {
+                            const hora = `${String(i).padStart(2, '0')}:00`;
+                            horariosLista.push(hora);
+                            html += `
+                                <span class="px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium border border-blue-500/30">
+                                    ${hora}
+                                </span>
+                            `;
+                        }
+
+                        horariosPreview.innerHTML = html;
+                        dataInput.value = JSON.stringify({
+                            dias: diasSeleccionados,
+                            hora_inicio: horaInicioVal,
+                            hora_fin: horaFinVal,
+                            horarios: horariosLista
+                        });
+                    }
+
+                    diaInicio.addEventListener('change', actualizarDiasPreview);
+                    diaFin.addEventListener('change', actualizarDiasPreview);
+                    selectInicio.addEventListener('change', actualizarPreviewCompleta);
+                    selectFin.addEventListener('change', actualizarPreviewCompleta);
+                </script>
+            </div>
+
+            <!-- Card 4: Precios -->
+            <div class="bg-gradient-to-br from-slate-800/50 to-slate-700/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl hover:shadow-emerald-500/10 transition-all">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                        <span class="text-green-400 font-bold">4</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Tarifa por Hora</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300">Fútbol 5 (S/hora)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-slate-400">S/. </span>
+                            <input type="number" name="precio_futbol5" placeholder=" 25" step="0.50" 
+                                class="w-full pl-8 pr-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300">Fútbol 7 (S/hora)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-slate-400">S/. </span>
+                            <input type="number" name="precio_futbol7" placeholder=" 35" step="0.50" 
+                                class="w-full pl-8 pr-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-300">Fútbol 11 (S/hora)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-slate-400">S/. </span>
+                            <input type="number" name="precio_futbol11" placeholder=" 50" step="0.50" 
+                                class="w-full pl-8 pr-4 py-3 bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 transition-all outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Amenidades -->
+            <div class="bg-gradient-to-br from-slate-800/50 to-slate-700/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl hover:shadow-emerald-500/10 transition-all">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                        <span class="text-purple-400 font-bold">5</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Amenidades</h2>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="estacionamiento" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">🅿️ Estacionamiento</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="vestuarios" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">👕 Vestuarios</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="duchas" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">🚿 Duchas</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="cafeteria" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">☕ Cafetería</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="iluminacion" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">💡 Iluminación nocturna</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="gradas" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">🪑 Gradas</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="wifi" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">📶 WiFi</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" name="amenidades" value="botiquin" class="w-5 h-5 rounded accent-purple-500">
+                        <span class="text-slate-300 group-hover:text-white transition-colors">🏥 Botiquín</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button type="reset" class="flex-1 px-8 py-4 rounded-xl font-semibold text-slate-300 border-2 border-slate-600 hover:border-slate-500 hover:text-white transition-all">
+                    Limpiar Formulario
+                </button>
+                <button type="submit" class="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 shadow-lg hover:shadow-emerald-500/50 transform hover:scale-105 transition-all">
+                    ✓ Registrar Cancha
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @supports (color: oklch(0 0 0)) {
+        .bg-gradient-to-br {
+            background-image: linear-gradient(135deg, var(--tw-gradient-stops));
+        }
+    }
+
+    input[type="checkbox"]:checked {
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    }
+</style>
+
+{% endblock %}

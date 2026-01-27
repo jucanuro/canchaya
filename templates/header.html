@@ -1,17 +1,62 @@
-<nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
-            <div class="flex items-center gap-2">
-                <div class="bg-green-600 p-2 rounded-lg">
-                    <i class="fas fa-futbol text-white text-xl"></i>
-                </div>
-                <span class="text-2xl font-bold tracking-tight text-slate-800">Canch<span class="text-green-600">aya</span></span>
-            </div>
-            <div class="hidden md:flex space-x-8 font-medium">
-                <a href="#" class="text-slate-600 hover:text-green-600 transition">Explorar</a>
-                <a href="#" class="text-slate-600 hover:text-green-600 transition">Mis Reservas</a>
-                <a href="#" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
-            </div>
+<header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3" aria-label="Canchaya inicio">
+        <div class="flex items-center justify-center w-10 h-10 bg-green-600 rounded-lg shadow-sm">
+          <span class="text-2xl">⚽</span>
         </div>
+        <span class="text-2xl font-bold tracking-tight text-slate-800">
+          Canch<span class="text-green-600">aya</span>
+        </span>
+      </a>
+
+      <!-- Mobile menu button -->
+      <button id="nav-toggle" class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-600 hover:text-green-600 focus:outline-none focus:ring-2 focus:ring-green-500" aria-controls="primary-navigation" aria-expanded="false" aria-label="Abrir menú">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <!-- Desktop / responsive nav -->
+      <nav id="primary-navigation" class="hidden md:flex items-center space-x-8 font-medium" aria-label="Navegación principal">
+        <a href="#" class="text-slate-600 hover:text-green-600 transition">Explorar</a>
+        <a href="#" class="text-slate-600 hover:text-green-600 transition">Mis Reservas</a>
+        <a href="#" class="text-slate-600 hover:text-green-600 transition">Registrar nueva cancha</a>
+        <a href="#" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
+      </nav>
     </div>
-</nav>
+  </div>
+
+  <!-- Mobile panel -->
+  <div id="mobile-panel" class="md:hidden hidden border-t border-slate-100 bg-white/90 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <nav class="flex flex-col space-y-2" aria-label="Navegación móvil">
+        <a href="#" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Explorar</a>
+        <a href="#" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Mis Reservas</a>
+        <a href="#" class="block px-3 py-2 rounded-md bg-green-600 text-white text-center rounded-full hover:bg-green-700">Iniciar Sesión</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Toggle simple para el menú móvil
+  const toggleBtn = document.getElementById('nav-toggle');
+  const mobilePanel = document.getElementById('mobile-panel');
+  const nav = document.getElementById('primary-navigation');
+
+  toggleBtn.addEventListener('click', () => {
+    const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    toggleBtn.setAttribute('aria-expanded', String(!expanded));
+    mobilePanel.classList.toggle('hidden');
+  });
+
+  // Cerrar menú al cambiar tamaño de ventana
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      mobilePanel.classList.add('hidden');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
