@@ -20,10 +20,11 @@
 
       <!-- Desktop / responsive nav -->
       <nav id="primary-navigation" class="hidden md:flex items-center space-x-8 font-medium" aria-label="Navegación principal">
-        <a href="{% url 'index' %}" class="text-slate-600 hover:text-green-600 transition">Explorar</a>
+        <a href="{% url 'index' %}" class="text-slate-600 hover:text-green-600 transition">Inicio</a>
+        <a href="{% url 'nosotros' %}" class="text-slate-600 hover:text-green-600 transition">Nosotros</a>
         <a href="{% url 'reservar' %}" class="text-slate-600 hover:text-green-600 transition">Reservar Cancha</a>
-        <a href="{% url 'registroCancha' %}" class="text-slate-600 hover:text-green-600 transition">Registrar nueva cancha</a>
-        <a href="#" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
+        <a href="{% url 'registroCancha' %}" class="text-slate-600 hover:text-green-600 transition">Registrar tu cancha</a>
+        <a href="{% url 'login' %}" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
       </nav>
     </div>
   </div>
@@ -32,9 +33,11 @@
   <div id="mobile-panel" class="md:hidden hidden border-t border-slate-100 bg-white/90 backdrop-blur-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
       <nav class="flex flex-col space-y-2" aria-label="Navegación móvil">
-        <a href="#" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Explorar</a>
-        <a href="#" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Mis Reservas</a>
-        <a href="#" class="block px-3 py-2 rounded-md bg-green-600 text-white text-center rounded-full hover:bg-green-700">Iniciar Sesión</a>
+        <a href="{% url 'index' %}" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Inicio</a>
+        <a href="{% url 'nosotros' %}" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Nosotros</a>
+        <a href="{% url 'reservar' %}" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Reservar Cancha</a>
+        <a href="{% url 'registroCancha' %}" class="block px-3 py-2 rounded-md text-slate-700 hover:bg-slate-50 hover:text-green-600">Registra tu cancha</a>
+        <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md bg-green-600 text-white text-center rounded-full hover:bg-green-700">Iniciar Sesión</a>
       </nav>
     </div>
   </div>
