@@ -20,9 +20,9 @@
 
       <!-- Desktop / responsive nav -->
       <nav id="primary-navigation" class="hidden md:flex items-center space-x-8 font-medium" aria-label="Navegación principal">
-        <a href="#" class="text-slate-600 hover:text-green-600 transition">Explorar</a>
-        <a href="#" class="text-slate-600 hover:text-green-600 transition">Mis Reservas</a>
-        <a href="#" class="text-slate-600 hover:text-green-600 transition">Registrar nueva cancha</a>
+        <a href="{% url 'index' %}" class="text-slate-600 hover:text-green-600 transition">Explorar</a>
+        <a href="{% url 'reservar' %}" class="text-slate-600 hover:text-green-600 transition">Reservar Cancha</a>
+        <a href="{% url 'registroCancha' %}" class="text-slate-600 hover:text-green-600 transition">Registrar nueva cancha</a>
         <a href="#" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
       </nav>
     </div>
