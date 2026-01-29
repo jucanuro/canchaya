@@ -14,3 +14,6 @@ def login(request):
 
 def nosotros(request):
     return render(request, 'nosotros.html')
+
+def perfil(request):
+    return render(request, 'perfil.html')

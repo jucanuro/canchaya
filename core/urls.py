@@ -7,4 +7,5 @@ urlpatterns = [
     path('reservar/', views.reservar, name='reservar'),
     path('login/', views.login, name='login'),
     path('nosotros/', views.nosotros, name='nosotros'),
+    path('perfil/', views.perfil, name='perfil'),
 ]
