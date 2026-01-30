@@ -17,3 +17,6 @@ def nosotros(request):
 
 def perfil(request):
     return render(request, 'perfil.html')
+
+def admin_dashboard(request):
+    return render(request, 'admin_dashboard.html')

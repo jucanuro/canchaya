@@ -25,6 +25,7 @@
         <a href="{% url 'reservar' %}" class="text-slate-600 hover:text-green-600 transition">Reservar Cancha</a>
         <a href="{% url 'registroCancha' %}" class="text-slate-600 hover:text-green-600 transition">Registrar tu cancha</a>
         <a href="{% url 'perfil' %}" class="text-slate-600 hover:text-green-600 transition">Perfil</a>
+        <a href="{% url 'admin_dashboard' %}" class="text-slate-600 hover:text-green-600 transition">Panel Admin</a>
         <a href="{% url 'login' %}" class="bg-green-600 text-white px-5 py-2 rounded-full hover:bg-green-700 transition shadow-lg shadow-green-200">Iniciar Sesión</a>
       </nav>
     </div>
@@ -43,24 +44,5 @@
     </div>
   </div>
 </header>
-
-<script>
-  // Toggle simple para el menú móvil
-  const toggleBtn = document.getElementById('nav-toggle');
-  const mobilePanel = document.getElementById('mobile-panel');
-  const nav = document.getElementById('primary-navigation');
-
-  toggleBtn.addEventListener('click', () => {
-    const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-    toggleBtn.setAttribute('aria-expanded', String(!expanded));
-    mobilePanel.classList.toggle('hidden');
-  });
-
-  // Cerrar menú al cambiar tamaño de ventana
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768) {
-      mobilePanel.classList.add('hidden');
-      toggleBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
-</script>
+{% load static %}
+<script src="{% static 'js/header.js' %}"></script>
