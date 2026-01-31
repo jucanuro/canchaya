@@ -1,6 +1,6 @@
-// =====================================
+// ========================================
 // VARIABLES GLOBALES
-// =====================================
+// ========================================
 let currentStep = 1;
 let calendarMonth = 0;
 let calendarYear = 2025;
@@ -22,9 +22,9 @@ const monthNames = [
 
 const weekdayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
-// =====================================
-// ONBOARDING - PASO 1: HORARIO
-// =====================================
+// ========================================
+// ONBOARDING - FLUJO INICIAL
+// ========================================
 function nextStep() {
     if (currentStep === 1) {
         const hour = document.getElementById('hourSelect').value;
@@ -45,17 +45,11 @@ function nextStep() {
     updateOnboardingUI();
 }
 
-// =====================================
-// ONBOARDING - PASO ANTERIOR
-// =====================================
 function prevStep() {
     currentStep--;
     updateOnboardingUI();
 }
 
-// =====================================
-// ACTUALIZAR UI DEL ONBOARDING
-// =====================================
 function updateOnboardingUI() {
     document.querySelectorAll('[id^="step"]').forEach(el => el.classList.add('hidden'));
     document.getElementById(`step${currentStep}`).classList.remove('hidden');
@@ -63,37 +57,27 @@ function updateOnboardingUI() {
     document.getElementById('progressBar').style.width = progress + '%';
 }
 
-// =====================================
-// USAR GPS PARA UBICACIÓN
-// =====================================
 function useGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                userPreferences.city = 'Mi ubicación (GPS)';
-                alert('✓ Ubicación detectada correctamente');
+                userPreferences.city = 'GPS';
+                alert('✓ Ubicación detectada');
                 completeOnboarding();
             },
             (error) => {
                 alert('No se pudo acceder al GPS. Por favor selecciona una ciudad.');
             }
         );
-    } else {
-        alert('GPS no disponible en tu dispositivo');
     }
 }
 
-// =====================================
-// COMPLETAR ONBOARDING
-// =====================================
 function completeOnboarding() {
     const city = document.getElementById('citySelect').value || userPreferences.city;
-    
     if (!city && !userPreferences.city) {
-        alert('Por favor selecciona una ciudad o usa GPS');
+        alert('Por favor selecciona una ciudad');
         return;
     }
-    
     if (!userPreferences.hour || !userPreferences.date) {
         alert('Por favor completa todos los pasos');
         return;
@@ -101,19 +85,13 @@ function completeOnboarding() {
 
     userPreferences.city = city;
 
-    // Ocultar modal y mostrar pantalla principal
     document.getElementById('onboardingModal').classList.add('hidden');
     document.getElementById('mainScreen').classList.remove('hidden');
 
-    // Actualizar header
     const dateObj = new Date(userPreferences.date);
-    const dateStr = dateObj.toLocaleDateString('es-ES', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    document.getElementById('headerInfo').textContent = `${userPreferences.hour} • ${dateStr} • ${userPreferences.city}`;
+    const dateStr = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const cityName = userPreferences.city === 'GPS' ? 'Mi ubicación' : userPreferences.city;
+    document.getElementById('headerInfo').textContent = `${userPreferences.hour} • ${dateStr} • ${cityName}`;
 
     // Generar calendario y canchas
     generateCalendar();
@@ -121,9 +99,9 @@ function completeOnboarding() {
     generateCanchasGrid();
 }
 
-// =====================================
-// GENERAR CALENDARIO
-// =====================================
+// ========================================
+// CALENDARIO
+// ========================================
 function generateCalendar() {
     const calendarGrid = document.getElementById('calendarGrid');
     calendarGrid.innerHTML = '';
@@ -147,8 +125,7 @@ function generateCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         const btn = document.createElement('button');
         const isToday = day === 4;
-        const isSelected = selectedCalendarDate &&
-                          selectedCalendarDate.getDate() === day &&
+        const isSelected = selectedCalendarDate && selectedCalendarDate.getDate() === day &&
                           selectedCalendarDate.getMonth() === calendarMonth &&
                           selectedCalendarDate.getFullYear() === calendarYear;
 
@@ -179,9 +156,6 @@ function generateCalendar() {
     }
 }
 
-// =====================================
-// SELECCIONAR FECHA DEL CALENDARIO
-// =====================================
 function selectCalendarDate(day) {
     selectedCalendarDate = new Date(calendarYear, calendarMonth, day);
     const dateStr = selectedCalendarDate.toLocaleDateString('es-ES', {
@@ -195,9 +169,6 @@ function selectCalendarDate(day) {
     generateCalendar();
 }
 
-// =====================================
-// NAVEGAR MES ANTERIOR
-// =====================================
 function prevCalendarMonth() {
     calendarMonth--;
     if (calendarMonth < 0) {
@@ -207,9 +178,6 @@ function prevCalendarMonth() {
     generateCalendar();
 }
 
-// =====================================
-// NAVEGAR MES SIGUIENTE
-// =====================================
 function nextCalendarMonth() {
     calendarMonth++;
     if (calendarMonth > 11) {
@@ -219,9 +187,9 @@ function nextCalendarMonth() {
     generateCalendar();
 }
 
-// =====================================
-// GENERAR CATÁLOGO DE CANCHAS
-// =====================================
+// ========================================
+// CATÁLOGO DE CANCHAS
+// ========================================
 function generateCanchasGrid() {
     const canchas = [
         { id: 1, nombre: 'Cancha Premium', tipo: 'Fútbol 5', precio: 45, estrellas: 5, superficie: 'Pasto Sintético', capacidad: '5v5' },
@@ -243,16 +211,7 @@ function generateCanchasGrid() {
         card.onclick = () => openHorarioModal(cancha.id, cancha.nombre, cancha.precio);
 
         const estrellas = '⭐'.repeat(cancha.estrellas);
-        const colores = [
-            'from-emerald-300 to-teal-400',
-            'from-teal-300 to-cyan-400',
-            'from-green-400 to-emerald-500',
-            'from-emerald-400 to-green-500',
-            'from-teal-400 to-cyan-500',
-            'from-green-500 to-emerald-600',
-            'from-emerald-500 to-teal-600',
-            'from-cyan-400 to-teal-500'
-        ];
+        const colores = ['from-emerald-300 to-teal-400', 'from-teal-300 to-cyan-400', 'from-green-400 to-emerald-500', 'from-emerald-400 to-green-500', 'from-teal-400 to-cyan-500', 'from-green-500 to-emerald-600', 'from-emerald-500 to-teal-600', 'from-cyan-400 to-teal-500'];
         const color = colores[cancha.id - 1];
 
         card.innerHTML = `
@@ -264,7 +223,7 @@ function generateCanchasGrid() {
                 <p class="text-xs text-gray-600 mb-2">${cancha.tipo}</p>
                 <p class="text-xs text-yellow-500 font-bold mb-3">${estrellas}</p>
                 <div class="mb-3 pb-3 border-b border-gray-200">
-                    <p class="text-lg font-black text-emerald-600">S/ ${cancha.precio}</p>
+                    <p class="text-lg font-black text-emerald-600">$${cancha.precio}</p>
                     <p class="text-xs text-gray-600">por hora</p>
                 </div>
                 <div class="space-y-1 text-xs">
@@ -281,9 +240,9 @@ function generateCanchasGrid() {
     });
 }
 
-// =====================================
-// ABRIR MODAL DE HORARIOS
-// =====================================
+// ========================================
+// MODAL HORARIOS
+// ========================================
 function openHorarioModal(canchaId, canchaNombre, precio) {
     currentCancha = canchaId;
     currentPrecio = precio;
@@ -299,16 +258,13 @@ function openHorarioModal(canchaId, canchaNombre, precio) {
     });
 }
 
-// =====================================
-// CERRAR MODAL DE HORARIOS
-// =====================================
 function closeHorarioModal() {
     document.getElementById('horarioModal').classList.add('hidden');
 }
 
-// =====================================
-// SELECCIONAR HORARIO
-// =====================================
+// ========================================
+// SELECCIÓN DE HORARIOS
+// ========================================
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.hourButton.available').forEach(button => {
         button.addEventListener('click', function() {
@@ -324,15 +280,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const horaInt = parseInt(selectedHora.split(':')[0]);
             document.getElementById('detalleHora').textContent = `${selectedHora} - ${String(horaInt + 1).padStart(2, '0')}:00`;
-            document.getElementById('detallePrecio').textContent = `S/ ${currentPrecio}`;
+            document.getElementById('detallePrecio').textContent = `$${currentPrecio}`;
 
             enablePayButton();
         });
     });
 
-    // =====================================
-    // SELECCIONAR MÉTODO DE PAGO
-    // =====================================
     document.querySelectorAll('.paymentMethod').forEach(method => {
         method.addEventListener('click', function() {
             document.querySelectorAll('.paymentMethod div').forEach(m => {
@@ -348,62 +301,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('acceptTerms')?.addEventListener('change', enablePayButton);
 });
 
-// =====================================
-// HABILITAR BOTÓN PAGAR
-// =====================================
 function enablePayButton() {
     const btn = document.getElementById('pagarBtn');
     const terms = document.getElementById('acceptTerms');
     if (terms?.checked && selectedHora) {
         btn.disabled = false;
-    } else {
-        btn.disabled = true;
     }
 }
 
-// =====================================
+// ========================================
 // PROCESAR PAGO
-// =====================================
+// ========================================
 function procesarPago() {
     if (!selectedHora) {
-        alert('Por favor selecciona un horario');
+        alert('Selecciona un horario');
         return;
     }
-
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
-    const paymentNames = {
-        'credit_card': 'Tarjeta de Crédito',
-        'debit_card': 'Tarjeta de Débito',
-        'yape': 'Yapeí',
-        'plin': 'Plin',
-        'transfer': 'Transferencia Bancaria',
-        'cash': 'Efectivo'
-    };
-
-    const methodName = paymentNames[paymentMethod] || 'Desconocido';
-    alert(`✓ ¡Reserva confirmada!\n\nCancha: ${document.getElementById('modalTitle').textContent}\nHorario: ${document.getElementById('detalleHora').textContent}\nTotal: ${document.getElementById('detallePrecio').textContent}\nMétodo: ${methodName}`);
-    
+    alert('✓ Reserva confirmada');
     closeHorarioModal();
 }
 
-// =====================================
-// ABRIR MODAL DE FILTROS
-// =====================================
+// ========================================
+// FILTROS
+// ========================================
 function openFilterModal() {
     document.getElementById('filterModal').classList.remove('hidden');
 }
 
-// =====================================
-// CERRAR MODAL DE FILTROS
-// =====================================
 function closeFilterModal() {
     document.getElementById('filterModal').classList.add('hidden');
-}
-
-// =====================================
-// APLICAR FILTROS
-// =====================================
-function applyFilters() {
-    alert('✓ Filtros aplicados correctamente');
-    closeFilterModal();
 }

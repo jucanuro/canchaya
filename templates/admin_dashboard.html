@@ -2,1023 +2,495 @@
 
 {% block content %}
 
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
-    
-    :root {
-        --primary-green: #10b981;
-        --dark-bg: #0f172a;
-        --card-bg: #1e293b;
-        --accent-lime: #84cc16;
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        --border-color: #334155;
-        --danger-red: #ef4444;
-        --warning-orange: #f59e0b;
-        --success-green: #22c55e;
-    }
-    
-    body {
-        font-family: 'Rajdhani', sans-serif;
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-        color: var(--text-primary);
-        overflow-x: hidden;
-    }
-    
-    .dashboard-container {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        min-height: 100vh;
-        position: relative;
-    }
-    
-    /* Sidebar Styles */
-    .sidebar {
-        background: var(--card-bg);
-        border-right: 1px solid var(--border-color);
-        padding: 2rem 1.5rem;
-        position: fixed;
-        width: 280px;
-        height: 100vh;
-        overflow-y: auto;
-        z-index: 40;
-        transition: transform 0.3s ease;
-    }
-    
-    .sidebar-logo {
-        font-family: 'Space Mono', monospace;
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--primary-green), var(--accent-lime));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 2.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .sidebar-nav {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .sidebar-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 0.875rem 1rem;
-        border-radius: 0.75rem;
-        color: var(--text-secondary);
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 1.05rem;
-        transition: all 0.2s ease;
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-    }
-    
-    .sidebar-nav-item::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 3px;
-        background: var(--primary-green);
-        transform: scaleY(0);
-        transition: transform 0.2s ease;
-    }
-    
-    .sidebar-nav-item:hover,
-    .sidebar-nav-item.active {
-        background: rgba(16, 185, 129, 0.1);
-        color: var(--primary-green);
-    }
-    
-    .sidebar-nav-item.active::before {
-        transform: scaleY(1);
-    }
-    
-    .sidebar-nav-item svg {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
-    
-    .sidebar-section-title {
-        color: var(--text-secondary);
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin: 2rem 0 1rem 1rem;
-    }
-    
-    /* Main Content Area */
-    .main-content {
-        margin-left: 280px;
-        padding: 2rem;
-        animation: fadeInUp 0.5s ease;
-    }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Header */
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    
-    .dashboard-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-    
-    .header-actions {
-        display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-    
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, var(--primary-green), var(--accent-lime));
-        color: white;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-    }
-    
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    }
-    
-    .btn-secondary {
-        background: var(--card-bg);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    
-    .btn-secondary:hover {
-        background: rgba(51, 65, 85, 0.8);
-    }
-    
-    /* Stats Grid */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
-    }
-    
-    .stat-card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 1.25rem;
-        padding: 1.75rem;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary-green), var(--accent-lime));
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        border-color: var(--primary-green);
-    }
-    
-    .stat-card:hover::before {
-        transform: scaleX(1);
-    }
-    
-    .stat-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-    }
-    
-    .stat-icon {
-        width: 3rem;
-        height: 3rem;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-    
-    .stat-icon.green {
-        background: rgba(16, 185, 129, 0.15);
-        color: var(--primary-green);
-    }
-    
-    .stat-icon.lime {
-        background: rgba(132, 204, 22, 0.15);
-        color: var(--accent-lime);
-    }
-    
-    .stat-icon.orange {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--warning-orange);
-    }
-    
-    .stat-icon.red {
-        background: rgba(239, 68, 68, 0.15);
-        color: var(--danger-red);
-    }
-    
-    .stat-trend {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        padding: 0.25rem 0.75rem;
-        border-radius: 2rem;
-    }
-    
-    .stat-trend.up {
-        background: rgba(34, 197, 94, 0.15);
-        color: var(--success-green);
-    }
-    
-    .stat-trend.down {
-        background: rgba(239, 68, 68, 0.15);
-        color: var(--danger-red);
-    }
-    
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        line-height: 1;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        font-weight: 500;
-    }
-    
-    /* Content Grid */
-    .content-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    /* Card Styles */
-    .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 1.25rem;
-        padding: 1.75rem;
-        transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-        border-color: rgba(16, 185, 129, 0.3);
-    }
-    
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    
-    .card-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-    
-    .card-action {
-        color: var(--primary-green);
-        font-size: 0.9rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        transition: gap 0.2s ease;
-        cursor: pointer;
-    }
-    
-    .card-action:hover {
-        gap: 0.5rem;
-    }
-    
-    /* Table Styles */
-    .table-container {
-        overflow-x: auto;
-    }
-    
-    table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-    
-    thead tr {
-        border-bottom: 2px solid var(--border-color);
-    }
-    
-    th {
-        text-align: left;
-        padding: 1rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    
-    tbody tr {
-        border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-        transition: all 0.2s ease;
-    }
-    
-    tbody tr:hover {
-        background: rgba(16, 185, 129, 0.05);
-    }
-    
-    td {
-        padding: 1.25rem 1rem;
-        font-size: 1rem;
-    }
-    
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-    
-    .status-badge.active {
-        background: rgba(34, 197, 94, 0.15);
-        color: var(--success-green);
-    }
-    
-    .status-badge.pending {
-        background: rgba(245, 158, 11, 0.15);
-        color: var(--warning-orange);
-    }
-    
-    .status-badge.cancelled {
-        background: rgba(239, 68, 68, 0.15);
-        color: var(--danger-red);
-    }
-    
-    .status-badge.confirmed {
-        background: rgba(132, 204, 22, 0.15);
-        color: var(--accent-lime);
-    }
-    
-    .status-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: currentColor;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
-    }
-    
-    /* Activity Feed */
-    .activity-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-    
-    .activity-item {
-        display: flex;
-        gap: 1rem;
-        padding: 1rem;
-        border-radius: 0.75rem;
-        transition: all 0.2s ease;
-    }
-    
-    .activity-item:hover {
-        background: rgba(16, 185, 129, 0.05);
-    }
-    
-    .activity-icon {
-        width: 2.5rem;
-        height: 2.5rem;
-        border-radius: 0.75rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        font-size: 1.25rem;
-    }
-    
-    .activity-content {
-        flex: 1;
-    }
-    
-    .activity-title {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-    
-    .activity-description {
-        color: var(--text-secondary);
-        font-size: 0.9rem;
-    }
-    
-    .activity-time {
-        color: var(--text-secondary);
-        font-size: 0.85rem;
-        font-family: 'Space Mono', monospace;
-    }
-    
-    /* Quick Actions */
-    .quick-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    
-    .quick-action-card {
-        background: var(--card-bg);
-        border: 2px dashed var(--border-color);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        color: var(--text-primary);
-    }
-    
-    .quick-action-card:hover {
-        border-color: var(--primary-green);
-        border-style: solid;
-        transform: translateY(-4px);
-        background: rgba(16, 185, 129, 0.05);
-    }
-    
-    .quick-action-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .quick-action-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-    
-    /* Mobile Responsive */
-    @media (max-width: 1024px) {
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-container {
-            grid-template-columns: 1fr;
-        }
-        
-        .sidebar {
-            transform: translateX(-100%);
-        }
-        
-        .sidebar.mobile-open {
-            transform: translateX(0);
-        }
-        
-        .main-content {
-            margin-left: 0;
-        }
-        
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .dashboard-title {
-            font-size: 1.75rem;
-        }
-    }
-    
-    /* Loading Animation */
-    .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(16, 185, 129, 0.2);
-        border-top-color: var(--primary-green);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    /* Chart Container */
-    .chart-container {
-        height: 300px;
-        margin-top: 1.5rem;
-    }
-    
-    /* Search Bar */
-    .search-bar {
-        position: relative;
-        max-width: 400px;
-    }
-    
-    .search-input {
-        width: 100%;
-        padding: 0.875rem 1rem 0.875rem 3rem;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 0.75rem;
-        color: var(--text-primary);
-        font-size: 1rem;
-        transition: all 0.2s ease;
-    }
-    
-    .search-input:focus {
-        outline: none;
-        border-color: var(--primary-green);
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    }
-    
-    .search-icon {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-secondary);
-    }
-    
-    /* Mobile Menu Toggle */
-    .mobile-menu-toggle {
-        display: none;
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        width: 3.5rem;
-        height: 3.5rem;
-        background: linear-gradient(135deg, var(--primary-green), var(--accent-lime));
-        border-radius: 50%;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-        z-index: 50;
-    }
-    
-    @media (max-width: 768px) {
-        .mobile-menu-toggle {
-            display: flex;
-        }
-    }
-</style>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<div class="dashboard-container">
+<div x-data="dashboardApp()" class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 font-sans">
+    
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            ⚽ CANCHAYA
+    <aside 
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+        class="fixed top-0 left-0 z-40 w-72 h-screen transition-transform duration-300 ease-in-out lg:translate-x-0 bg-slate-800 border-r border-slate-700"
+    >
+        <div class="h-full px-6 py-8 overflow-y-auto">
+            <!-- Logo -->
+            <div class="mb-10">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg">
+                        ⚽
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+                        CANCHAYA
+                    </h1>
+                </div>
+                <p class="text-xs text-slate-400 ml-16">Admin Panel</p>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="space-y-2">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-500/10 text-emerald-400 border-l-4 border-emerald-500 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Reservas</span>
+                    <span class="ml-auto px-2 py-0.5 text-xs font-bold rounded-full bg-emerald-500 text-white">12</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span>Canchas</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <span>Usuarios</span>
+                </a>
+                
+                <div class="px-3 mt-6 mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                    Análisis
+                </div>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Estadísticas</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Reportes</span>
+                </a>
+                
+                <div class="px-3 mt-6 mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                    Finanzas
+                </div>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    <span>Pagos</span>
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span>Facturación</span>
+                </a>
+                
+                <div class="px-3 mt-6 mb-2 text-xs font-semibold tracking-wider text-slate-400 uppercase">
+                    Sistema
+                </div>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 border-l-4 border-transparent transition-all duration-200 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+            
+            <!-- User Profile -->
+            <div class="mt-auto pt-6 border-t border-slate-700">
+                <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors cursor-pointer">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">
+                        A
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-slate-50">Administrador</p>
+                        <p class="text-xs text-slate-400">admin@canchaya.com</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <nav class="sidebar-nav">
-            <a href="#" class="sidebar-nav-item active">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                <span>Dashboard</span>
-            </a>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span>Reservas</span>
-            </a>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                <span>Canchas</span>
-            </a>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-                <span>Usuarios</span>
-            </a>
-            
-            <div class="sidebar-section-title">Análisis</div>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                </svg>
-                <span>Estadísticas</span>
-            </a>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span>Reportes</span>
-            </a>
-            
-            <div class="sidebar-section-title">Finanzas</div>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                </svg>
-                <span>Pagos</span>
-            </a>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <span>Facturación</span>
-            </a>
-            
-            <div class="sidebar-section-title">Configuración</div>
-            
-            <a href="#" class="sidebar-nav-item">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>Configuración</span>
-            </a>
-            
-            <a href="/" class="sidebar-nav-item" style="margin-top: 2rem; color: var(--danger-red);">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                <span>Volver al Sitio</span>
-            </a>
-        </nav>
     </aside>
     
     <!-- Main Content -->
-    <main class="main-content">
-        <!-- Header -->
-        <header class="dashboard-header">
-            <div>
-                <h1 class="dashboard-title">Panel de Control</h1>
-                <p style="color: var(--text-secondary); font-size: 1.1rem; margin-top: 0.5rem;">
-                    Bienvenido de vuelta, <strong>Administrador</strong> 👋
-                </p>
-            </div>
-            
-            <div class="header-actions">
-                <div class="search-bar">
-                    <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" class="search-input" placeholder="Buscar...">
+    <div class="lg:ml-72">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-30 bg-slate-800/80 backdrop-blur-xl border-b border-slate-700">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <!-- Mobile Menu Button -->
+                    <button 
+                        @click="sidebarOpen = !sidebarOpen"
+                        class="lg:hidden p-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Search Bar -->
+                    <div class="flex-1 max-w-xl mx-4">
+                        <div class="relative">
+                            <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input 
+                                type="text" 
+                                placeholder="Buscar reservas, canchas, usuarios..." 
+                                class="w-full pl-12 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-xl text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                            >
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex items-center gap-3">
+                        <!-- Notifications -->
+                        <button class="relative p-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        
+                        <!-- New Reservation Button -->
+                        <button class="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="hidden sm:inline">Nueva Reserva</span>
+                        </button>
+                    </div>
                 </div>
-                <button class="btn btn-secondary">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </button>
-                <button class="btn btn-primary">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Nueva Reserva
-                </button>
             </div>
         </header>
         
-        <!-- Stats Grid -->
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon green">⚽</div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>12%</span>
+        <!-- Dashboard Content -->
+        <main class="p-6 space-y-6">
+            
+            <!-- Welcome Section -->
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">¡Bienvenido de vuelta, Administrador! 👋</h2>
+                        <p class="text-emerald-100">
+                            Hoy es <span x-text="currentDate"></span>. Tienes <strong>12</strong> reservas pendientes.
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-5xl font-bold" x-text="currentTime"></p>
+                        <p class="text-emerald-100 text-sm mt-1">Hora del sistema</p>
                     </div>
                 </div>
-                <div class="stat-value">247</div>
-                <div class="stat-label">Reservas Totales</div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon lime">💰</div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>8.5%</span>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 group cursor-pointer">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl bg-emerald-500/20 text-emerald-400 transition-transform group-hover:scale-110">
+                            ⚽
+                        </div>
+                        <div class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-green-500/20 text-green-400">
+                            <span>↑</span>
+                            <span>12%</span>
+                        </div>
                     </div>
-                </div>
-                <div class="stat-value">S/. 15,420</div>
-                <div class="stat-label">Ingresos del Mes</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon orange">🏟️</div>
-                    <div class="stat-trend down">
-                        <span>↓</span>
-                        <span>3%</span>
+                    <div>
+                        <p class="text-4xl font-bold text-slate-50 mb-2">247</p>
+                        <p class="text-slate-400 font-medium">Reservas Totales</p>
                     </div>
-                </div>
-                <div class="stat-value">18</div>
-                <div class="stat-label">Canchas Activas</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon red">👥</div>
-                    <div class="stat-trend up">
-                        <span>↑</span>
-                        <span>24%</span>
-                    </div>
-                </div>
-                <div class="stat-value">86</div>
-                <div class="stat-label">Nuevos Usuarios</div>
-            </div>
-        </section>
-        
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-            <div class="quick-action-card">
-                <div class="quick-action-icon">📅</div>
-                <div class="quick-action-title">Nueva Reserva</div>
-            </div>
-            <div class="quick-action-card">
-                <div class="quick-action-icon">➕</div>
-                <div class="quick-action-title">Agregar Cancha</div>
-            </div>
-            <div class="quick-action-card">
-                <div class="quick-action-icon">📊</div>
-                <div class="quick-action-title">Generar Reporte</div>
-            </div>
-            <div class="quick-action-card">
-                <div class="quick-action-icon">🔔</div>
-                <div class="quick-action-title">Enviar Notificación</div>
-            </div>
-        </section>
-        
-        <!-- Content Grid -->
-        <div class="content-grid">
-            <!-- Recent Reservations -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Reservas Recientes</h2>
-                    <a href="#" class="card-action">
-                        Ver todas
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
                 </div>
                 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Cancha</th>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Estado</th>
-                                <th>Monto</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 600;">Juan Pérez</div>
-                                    <div style="font-size: 0.875rem; color: var(--text-secondary);">juan@email.com</div>
-                                </td>
-                                <td>Cancha Fútbol 7 #3</td>
-                                <td>30/01/2026</td>
-                                <td>18:00 - 19:00</td>
-                                <td>
-                                    <span class="status-badge confirmed">
-                                        <span class="status-dot"></span>
-                                        Confirmada
-                                    </span>
-                                </td>
-                                <td style="font-weight: 700; color: var(--primary-green);">S/. 80.00</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 600;">María García</div>
-                                    <div style="font-size: 0.875rem; color: var(--text-secondary);">maria@email.com</div>
-                                </td>
-                                <td>Cancha Fútbol 5 #1</td>
-                                <td>31/01/2026</td>
-                                <td>20:00 - 21:00</td>
-                                <td>
-                                    <span class="status-badge pending">
-                                        <span class="status-dot"></span>
-                                        Pendiente
-                                    </span>
-                                </td>
-                                <td style="font-weight: 700; color: var(--primary-green);">S/. 60.00</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 600;">Carlos López</div>
-                                    <div style="font-size: 0.875rem; color: var(--text-secondary);">carlos@email.com</div>
-                                </td>
-                                <td>Cancha Fútbol 11 #1</td>
-                                <td>01/02/2026</td>
-                                <td>16:00 - 17:30</td>
-                                <td>
-                                    <span class="status-badge confirmed">
-                                        <span class="status-dot"></span>
-                                        Confirmada
-                                    </span>
-                                </td>
-                                <td style="font-weight: 700; color: var(--primary-green);">S/. 120.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Activity Feed -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Actividad Reciente</h2>
-                    <a href="#" class="card-action">
-                        Ver todo
-                        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 group cursor-pointer">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl bg-green-500/20 text-green-400 transition-transform group-hover:scale-110">
+                            💰
+                        </div>
+                        <div class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-green-500/20 text-green-400">
+                            <span>↑</span>
+                            <span>8.5%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold text-slate-50 mb-2">S/. 15,420</p>
+                        <p class="text-slate-400 font-medium">Ingresos del Mes</p>
+                    </div>
                 </div>
                 
-                <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon green" style="background: rgba(16, 185, 129, 0.15); color: var(--primary-green);">
-                            ✓
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 group cursor-pointer">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl bg-orange-500/20 text-orange-400 transition-transform group-hover:scale-110">
+                            🏟️
                         </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Nueva reserva confirmada</div>
-                            <div class="activity-description">Juan Pérez reservó Cancha Fútbol 7 #3</div>
-                            <div class="activity-time">Hace 15 minutos</div>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon lime" style="background: rgba(132, 204, 22, 0.15); color: var(--accent-lime);">
-                            ★
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Pago recibido</div>
-                            <div class="activity-description">S/. 80.00 - Reserva #R2547</div>
-                            <div class="activity-time">Hace 1 hora</div>
+                        <div class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-red-500/20 text-red-400">
+                            <span>↓</span>
+                            <span>3%</span>
                         </div>
                     </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon orange" style="background: rgba(245, 158, 11, 0.15); color: var(--warning-orange);">
-                            ⚠
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Reserva cancelada</div>
-                            <div class="activity-description">María García canceló su reserva</div>
-                            <div class="activity-time">Hace 2 horas</div>
-                        </div>
-                    </div>
-                    
-                    <div class="activity-item">
-                        <div class="activity-icon green" style="background: rgba(16, 185, 129, 0.15); color: var(--primary-green);">
-                            ✓
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">Nueva cancha registrada</div>
-                            <div class="activity-description">Cancha Fútbol 11 "El Estadio"</div>
-                            <div class="activity-time">Hace 3 horas</div>
-                        </div>
+                    <div>
+                        <p class="text-4xl font-bold text-slate-50 mb-2">18</p>
+                        <p class="text-slate-400 font-medium">Canchas Activas</p>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Additional Stats Section -->
-        <div class="card" style="margin-top: 1.5rem;">
-            <div class="card-header">
-                <h2 class="card-title">Ocupación de Canchas - Esta Semana</h2>
-                <select class="btn btn-secondary" style="padding: 0.5rem 1rem;">
-                    <option>Esta Semana</option>
-                    <option>Este Mes</option>
-                    <option>Este Año</option>
-                </select>
+                
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 group cursor-pointer">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl bg-blue-500/20 text-blue-400 transition-transform group-hover:scale-110">
+                            👥
+                        </div>
+                        <div class="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold bg-green-500/20 text-green-400">
+                            <span>↑</span>
+                            <span>24%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-4xl font-bold text-slate-50 mb-2">86</p>
+                        <p class="text-slate-400 font-medium">Nuevos Usuarios</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="chart-container">
-                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary);">
-                    <div style="text-align: center;">
-                        <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin: 0 auto 1rem;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <p>Integrar Chart.js para visualización de datos</p>
-                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Agrega: &lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;</p>
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
+                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">📅</div>
+                    <p class="text-slate-200 font-semibold">Nueva Reserva</p>
+                </button>
+                
+                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
+                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">➕</div>
+                    <p class="text-slate-200 font-semibold">Agregar Cancha</p>
+                </button>
+                
+                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
+                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">📊</div>
+                    <p class="text-slate-200 font-semibold">Generar Reporte</p>
+                </button>
+                
+                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
+                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">🔔</div>
+                    <p class="text-slate-200 font-semibold">Enviar Notificación</p>
+                </button>
+            </div>
+            
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <!-- Recent Reservations -->
+                <div class="xl:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-50">Reservas Recientes</h3>
+                        <button class="px-4 py-2 text-emerald-400 hover:text-emerald-300 text-sm font-semibold flex items-center gap-1">
+                            Ver todas
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-slate-700">
+                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Cliente</th>
+                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Cancha</th>
+                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Fecha/Hora</th>
+                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Estado</th>
+                                    <th class="text-right py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-slate-100">Juan Pérez</p>
+                                            <p class="text-sm text-slate-400">juan@email.com</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 7 #3</td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="text-slate-200">30/01/2026</p>
+                                            <p class="text-sm text-slate-400">18:00 - 19:00</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/20 text-green-400">
+                                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                            <span>Confirmada</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <span class="text-emerald-400 font-bold text-lg">S/. 80.00</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-slate-100">María García</p>
+                                            <p class="text-sm text-slate-400">maria@email.com</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 5 #1</td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="text-slate-200">31/01/2026</p>
+                                            <p class="text-sm text-slate-400">20:00 - 21:00</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-400">
+                                            <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                                            <span>Pendiente</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <span class="text-emerald-400 font-bold text-lg">S/. 60.00</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="font-semibold text-slate-100">Carlos López</p>
+                                            <p class="text-sm text-slate-400">carlos@email.com</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 11 #1</td>
+                                    <td class="py-4 px-4">
+                                        <div>
+                                            <p class="text-slate-200">01/02/2026</p>
+                                            <p class="text-sm text-slate-400">16:00 - 17:30</p>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/20 text-green-400">
+                                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                            <span>Confirmada</span>
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <span class="text-emerald-400 font-bold text-lg">S/. 120.00</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Activity Feed -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-50">Actividad Reciente</h3>
+                        <button class="text-emerald-400 hover:text-emerald-300 text-sm font-semibold">
+                            Ver todo
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4 max-h-[600px] overflow-y-auto">
+                        <div class="flex gap-4 p-4 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-green-500/20 text-green-400 text-xl">
+                                ✓
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-slate-100 mb-1">Nueva reserva confirmada</p>
+                                <p class="text-sm text-slate-400 mb-2">Juan Pérez reservó Cancha Fútbol 7 #3</p>
+                                <p class="text-xs text-slate-500 font-mono">Hace 15 minutos</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 p-4 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-yellow-500/20 text-yellow-400 text-xl">
+                                ★
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-slate-100 mb-1">Pago recibido</p>
+                                <p class="text-sm text-slate-400 mb-2">S/. 80.00 - Reserva #R2547</p>
+                                <p class="text-xs text-slate-500 font-mono">Hace 1 hora</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 p-4 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 text-orange-400 text-xl">
+                                ⚠
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-slate-100 mb-1">Reserva cancelada</p>
+                                <p class="text-sm text-slate-400 mb-2">María García canceló su reserva</p>
+                                <p class="text-xs text-slate-500 font-mono">Hace 2 horas</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4 p-4 rounded-xl hover:bg-slate-700/50 transition-colors cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-green-500/20 text-green-400 text-xl">
+                                ✓
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-slate-100 mb-1">Nueva cancha registrada</p>
+                                <p class="text-sm text-slate-400 mb-2">Cancha Fútbol 11 "El Estadio"</p>
+                                <p class="text-xs text-slate-500 font-mono">Hace 3 horas</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+            
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Revenue Chart -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-50">Ingresos Mensuales</h3>
+                    </div>
+                    <canvas id="revenueChart" height="300"></canvas>
+                </div>
+                
+                <!-- Occupancy Chart -->
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-2xl font-bold text-slate-50">Ocupación de Canchas</h3>
+                    </div>
+                    <canvas id="occupancyChart" height="300"></canvas>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div 
+        x-show="sidebarOpen" 
+        @click="sidebarOpen = false"
+        x-transition:enter="transition-opacity ease-linear duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-linear duration-300"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black/50 z-30 lg:hidden"
+        style="display: none;"
+    ></div>
+    
 </div>
 
-<!-- Mobile Menu Toggle -->
-<div class="mobile-menu-toggle" id="mobileMenuToggle">
-    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-    </svg>
-</div>
+{% load static %}
 
-<script>
-    // Mobile menu toggle
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    const sidebar = document.getElementById('sidebar');
-    
-    if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('mobile-open');
-        });
-    }
-    
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', function(event) {
-        if (window.innerWidth <= 768) {
-            if (!sidebar.contains(event.target) && !mobileMenuToggle.contains(event.target)) {
-                sidebar.classList.remove('mobile-open');
-            }
-        }
-    });
-</script>
+<!-- JavaScript externo -->
+<script src="{% static 'js/dashboard.js' %}"></script>
+
 {% endblock %}

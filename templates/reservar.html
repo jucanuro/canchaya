@@ -2,596 +2,321 @@
 {% load static %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-50 overflow-hidden">
-    <!-- SIDEBAR FILTROS -->
-    <aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
-        <div class="p-8">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">🔍 Filtrar Canchas</h2>
-            <p class="text-xs text-gray-500 mb-8">Personaliza tu búsqueda</p>
-            
-            <form method="GET" id="filterForm" class="space-y-7">
-                {% csrf_token %}
-                
-                <!-- TIPO DE CANCHA -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">⚽</span> Tipo de Cancha
-                    </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="cancha_type" value="5" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Fútbol 5 (5v5)</span>
-                            <span class="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-bold">8</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="cancha_type" value="7" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Fútbol 7 (7v7)</span>
-                            <span class="ml-auto text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full font-bold">5</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="cancha_type" value="11" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Fútbol 11 (11v11)</span>
-                            <span class="ml-auto text-xs bg-teal-100 text-teal-700 px-2.5 py-1 rounded-full font-bold">3</span>
-                        </label>
+<div class="w-full min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+    <!-- MODAL ONBOARDING INICIAL -->
+    <div id="onboardingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div class="h-1 bg-gray-200">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-600 to-teal-600 transition-all duration-300" style="width: 33%"></div>
+            </div>
+
+            <div class="p-10">
+                <!-- PASO 1: HORARIO -->
+                <div id="step1" class="space-y-6">
+                    <div>
+                        <p class="text-4xl mb-3">🕐</p>
+                        <h2 class="text-3xl font-black text-gray-900 mb-2">¿A qué hora deseas jugar?</h2>
+                        <p class="text-gray-600">Selecciona tu horario preferido</p>
                     </div>
-                </div>
+                    
+                    <select id="hourSelect" class="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-600 font-semibold text-lg">
+                        <option value="">-- Selecciona un horario --</option>
+                        <option value="06:00">6:00 AM</option>
+                        <option value="07:00">7:00 AM</option>
+                        <option value="08:00">8:00 AM</option>
+                        <option value="09:00">9:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                        <option value="18:00">6:00 PM</option>
+                        <option value="19:00">7:00 PM</option>
+                        <option value="20:00">8:00 PM</option>
+                        <option value="21:00">9:00 PM</option>
+                        <option value="22:00">10:00 PM</option>
+                    </select>
 
-                <div class="border-t border-gray-100"></div>
-
-                <!-- RANGO DE PRECIOS -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">💰</span> Rango de Precios
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold mb-2 block">Mínimo: $<span id="minDisplay">0</span></label>
-                            <input type="range" name="price_min" id="priceMin" min="0" max="500" value="0" class="w-full h-2 bg-emerald-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-600 font-semibold mb-2 block">Máximo: $<span id="maxDisplay">500</span></label>
-                            <input type="range" name="price_max" id="priceMax" min="0" max="500" value="500" class="w-full h-2 bg-emerald-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-100"></div>
-
-                <!-- SUPERFICIE -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">🌿</span> Tipo de Superficie
-                    </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="superficie" value="pasto_natural" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Pasto Natural</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="superficie" value="pasto_sintetico" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Pasto Sintético</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="superficie" value="cemento" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Cemento</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="superficie" value="madera" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Madera</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-100"></div>
-
-                <!-- SERVICIOS -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">✨</span> Servicios Adicionales
-                    </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="servicios" value="iluminacion" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Iluminación</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="servicios" value="vestidores" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Vestidores</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="servicios" value="estacionamiento" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Estacionamiento</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="servicios" value="cafeteria" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Cafetería</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="servicios" value="arbitro" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Árbitro Disponible</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-100"></div>
-
-                <!-- UBICACIÓN -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">📍</span> Ubicación
-                    </h3>
-                    <input type="text" name="ubicacion" placeholder="Ej: Zona Norte, Centro..." class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition">
-                </div>
-
-                <div class="border-t border-gray-100"></div>
-
-                <!-- HORARIO PREFERIDO -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">🕐</span> Horario Preferido
-                    </h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="horario" value="manana" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Mañana (6:00 - 12:00)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="horario" value="tarde" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Tarde (12:00 - 18:00)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="checkbox" name="horario" value="noche" class="w-4 h-4 rounded border-gray-300 text-emerald-600 cursor-pointer accent-emerald-600" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Noche (18:00 - 23:00)</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="border-t border-gray-100"></div>
-
-                <!-- CALIFICACIÓN -->
-                <div>
-                    <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <span class="text-lg">⭐</span> Calificación Mínima
-                    </h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="radio" name="rating" value="5" class="w-4 h-4 text-emerald-600 cursor-pointer">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">⭐⭐⭐⭐⭐ (5.0)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="radio" name="rating" value="4" class="w-4 h-4 text-emerald-600 cursor-pointer" checked>
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">⭐⭐⭐⭐ (4.0+)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="radio" name="rating" value="3" class="w-4 h-4 text-emerald-600 cursor-pointer">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">⭐⭐⭐ (3.0+)</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer group">
-                            <input type="radio" name="rating" value="0" class="w-4 h-4 text-emerald-600 cursor-pointer">
-                            <span class="text-sm text-gray-700 group-hover:text-emerald-700 font-medium transition">Todas</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- BOTONES -->
-                <div class="space-y-3 pt-4">
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 shadow-sm">
-                        🔍 Buscar Canchas
-                    </button>
-                    <button type="reset" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold py-3 px-4 rounded-lg transition duration-200">
-                        Limpiar Filtros
+                    <button onclick="nextStep()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg text-lg">
+                        Siguiente →
                     </button>
                 </div>
-            </form>
+
+                <!-- PASO 2: FECHA -->
+                <div id="step2" class="space-y-6 hidden">
+                    <div>
+                        <p class="text-4xl mb-3">📅</p>
+                        <h2 class="text-3xl font-black text-gray-900 mb-2">¿Qué fecha prefieres?</h2>
+                        <p class="text-gray-600">Elige el día para tu reserva</p>
+                    </div>
+                    
+                    <input type="date" id="dateSelect" class="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-600 font-semibold text-lg">
+
+                    <div class="flex gap-3">
+                        <button onclick="prevStep()" class="flex-1 border-2 border-gray-300 text-gray-900 font-black py-4 rounded-xl hover:bg-gray-50 transition text-lg">
+                            ← Anterior
+                        </button>
+                        <button onclick="nextStep()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg text-lg">
+                            Siguiente →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASO 3: UBICACIÓN -->
+                <div id="step3" class="space-y-6 hidden">
+                    <div>
+                        <p class="text-4xl mb-3">📍</p>
+                        <h2 class="text-3xl font-black text-gray-900 mb-2">¿Dónde vas a jugar?</h2>
+                        <p class="text-gray-600">Selecciona tu ubicación</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button onclick="useGPS()" class="w-full flex items-center justify-center gap-2 px-4 py-4 border-2 border-emerald-300 text-emerald-700 font-black rounded-xl hover:bg-emerald-50 transition text-lg">
+                            📍 Usar mi ubicación (GPS)
+                        </button>
+                        
+                        <p class="text-center text-gray-500 text-sm font-semibold">O selecciona una ciudad</p>
+                        
+                        <select id="citySelect" class="w-full px-4 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:border-emerald-600 font-semibold text-lg">
+                            <option value="">-- Selecciona una ciudad --</option>
+                            <option value="Lima">Lima</option>
+                            <option value="Arequipa">Arequipa</option>
+                            <option value="Cusco">Cusco</option>
+                            <option value="Trujillo">Trujillo</option>
+                            <option value="Chiclayo">Chiclayo</option>
+                            <option value="Piura">Piura</option>
+                            <option value="Iquitos">Iquitos</option>
+                            <option value="Tacna">Tacna</option>
+                            <option value="Puno">Puno</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="prevStep()" class="flex-1 border-2 border-gray-300 text-gray-900 font-black py-4 rounded-xl hover:bg-gray-50 transition text-lg">
+                            ← Anterior
+                        </button>
+                        <button onclick="completeOnboarding()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg text-lg">
+                            Buscar →
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </aside>
+    </div>
 
-    <!-- CONTENIDO PRINCIPAL -->
-    <main class="flex-1 overflow-hidden flex flex-col bg-white">
+    <!-- PANTALLA PRINCIPAL -->
+    <div id="mainScreen" class="hidden w-full min-h-screen flex flex-col">
         <!-- HEADER -->
-        <header class="bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200 px-10 py-7 shadow-xs">
+        <header class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-10 py-8 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-black text-gray-900">Reserva tu Cancha</h1>
-                    <p class="text-emerald-700 mt-1 font-medium">Encuentra la cancha perfecta para tu partida</p>
+                    <h1 class="text-4xl font-black">⚽ Reserva tu Cancha</h1>
+                    <p id="headerInfo" class="text-emerald-100 mt-1 font-bold text-lg">Resultados disponibles</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button id="monthViewBtn" class="px-6 py-3 bg-white border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 font-bold transition rounded-lg flex items-center gap-2" onclick="switchView('month')">
-                        📅 Mes
-                    </button>
-                    <button id="weekViewBtn" class="px-6 py-3 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold transition rounded-lg flex items-center gap-2" onclick="switchView('week')">
-                        📋 Semana
-                    </button>
-                </div>
+                <button id="filterBtn" onclick="openFilterModal()" class="px-6 py-3 bg-white text-emerald-700 font-black rounded-lg hover:bg-gray-100 transition shadow-lg flex items-center gap-2 text-lg">
+                    <i class="fa-solid fa-sliders"></i> Filtrar
+                </button>
             </div>
         </header>
 
-        <!-- CONTENEDOR SCROLLEABLE -->
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
-            <style>
-            </style>
-            <div class="p-10">
-                <!-- VISTA DE MES -->
-                <div id="monthView" class="grid grid-cols-6 gap-8 h-full">
-                    <!-- CALENDARIO GRANDE -->
-                    <div class="col-span-2">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-10 sticky top-0">
-                            <!-- NAVEGACIÓN MESES -->
-                            <div class="flex items-center justify-between mb-10">
-                                <button class="p-3 hover:bg-emerald-100 rounded-lg transition text-emerald-700 font-bold" onclick="previousMonth()">
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="flex-1 overflow-y-auto px-10 py-8">
+            <div class="space-y-8 pb-20">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <!-- CALENDARIO COMPLETO (IZQUIERDA) -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-8">
+                            <h3 class="text-2xl font-black text-gray-900 mb-8">📅 Calendario</h3>
+                            
+                            <div class="flex items-center justify-between mb-8">
+                                <button onclick="prevCalendarMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                     </svg>
                                 </button>
-                                <h2 id="monthYear" class="text-2xl font-black text-gray-900 min-w-max">Enero 2025</h2>
-                                <button class="p-3 hover:bg-emerald-100 rounded-lg transition text-emerald-700 font-bold" onclick="nextMonth()">
+                                <h4 id="calendarMonth" class="text-xl font-bold text-gray-900">Enero 2025</h4>
+                                <button onclick="nextCalendarMonth()" class="p-2 hover:bg-gray-100 rounded-lg transition">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </button>
                             </div>
 
-                            <!-- HEADER DÍAS SEMANA -->
                             <div class="grid grid-cols-7 gap-2 mb-6">
-                                <div class="text-center text-xs font-black text-gray-600 py-3">LUN</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">MAR</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">MIÉ</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">JUE</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">VIE</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">SÁB</div>
-                                <div class="text-center text-xs font-black text-gray-600 py-3">DOM</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">L</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">M</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">M</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">J</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">V</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">S</div>
+                                <div class="text-center text-sm font-bold text-gray-600 py-3">D</div>
                             </div>
 
-                            <!-- GRID DE FECHAS -->
-                            <div id="calendarGrid" class="grid grid-cols-7 gap-2">
-                                <!-- FECHAS PREVIAS -->
-                                <button class="h-16 rounded-xl text-gray-400 font-bold text-lg hover:bg-gray-100 transition cursor-default">30</button>
-                                <button class="h-16 rounded-xl text-gray-400 font-bold text-lg hover:bg-gray-100 transition cursor-default">31</button>
-                                
-                                <!-- FECHAS DEL MES -->
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="1">1</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="2">2</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="3">3</button>
-                                <button class="dateBtn h-16 rounded-xl bg-emerald-600 text-white font-black text-lg hover:bg-emerald-700 transition shadow-lg hover:shadow-xl ring-2 ring-emerald-300" data-date="4" id="selectedDate">4</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="5">5</button>
-                                
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="6">6</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="7">7</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="8">8</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="9">9</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="10">10</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md ring-1 ring-emerald-300" data-date="11">11</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="12">12</button>
-                                
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="13">13</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="14">14</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="15">15</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="16">16</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="17">17</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="18">18</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="19">19</button>
-                                
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="20">20</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="21">21</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="22">22</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="23">23</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="24">24</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="25">25</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="26">26</button>
-                                
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="27">27</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="28">28</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="29">29</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="30">30</button>
-                                <button class="dateBtn h-16 rounded-xl text-gray-700 font-bold text-lg hover:bg-emerald-100 transition hover:shadow-md" data-date="31">31</button>
-                                
-                                <!-- FECHAS POSTERIORES -->
-                                <button class="h-16 rounded-xl text-gray-400 font-bold text-lg hover:bg-gray-100 transition cursor-default">1</button>
-                                <button class="h-16 rounded-xl text-gray-400 font-bold text-lg hover:bg-gray-100 transition cursor-default">2</button>
-                            </div>
+                            <div id="calendarGrid" class="grid grid-cols-7 gap-2 mb-10"></div>
 
-                            <!-- LEYENDA -->
-                            <div class="pt-10 border-t border-gray-200 text-sm text-gray-700 space-y-3">
-                                <p class="flex items-center gap-3"><span class="w-5 h-5 bg-emerald-600 rounded-lg"></span> <span class="font-bold">Hoy</span></p>
-                                <p class="flex items-center gap-3"><span class="w-5 h-5 border-2 border-emerald-300 rounded-lg"></span> <span class="font-bold">Disponible</span></p>
+                            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-6">
+                                <p class="text-xs text-gray-600 font-black mb-2">DÍA SELECCIONADO</p>
+                                <h4 id="selectedDayInfo" class="text-xl font-black text-gray-900">Selecciona una fecha</h4>
+                                <p class="text-sm text-emerald-700 font-bold mt-2">Horario: <span id="hourDisplay">--:--</span></p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RESULTADOS DE CANCHAS -->
-                    <div class="col-span-4">
-                        <!-- INFO FECHA -->
-                        <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-2 border-emerald-200 rounded-xl p-6 mb-8">
-                            <h3 class="text-lg font-black text-gray-900 mb-2">📅 <span id="selectedDateText">Sábado, 4 de Enero de 2025</span></h3>
-                            <p class="text-sm text-emerald-700 font-bold">Se encontraron <span class="text-emerald-600">12 canchas disponibles</span></p>
-                        </div>
-
-                        <!-- LISTA DE CANCHAS -->
-                        <div id="canchasGrid" class="space-y-5">
-                            <!-- CANCHA 1 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-300 transition group">
-                                <div class="p-8">
-                                    <div class="flex items-start justify-between mb-5">
-                                        <div class="flex-1">
-                                            <h3 class="text-xl font-black text-gray-900 group-hover:text-emerald-700 transition">⚽ Cancha Premium - Fútbol 5</h3>
-                                            <p class="text-sm text-gray-600 mt-2">📍 Centro Deportivo Las Vegas, Zona Norte</p>
-                                            <p class="text-xs text-gray-500 mt-1">Teléfono: +56 9 1234 5678</p>
-                                        </div>
-                                        <div class="text-right ml-8">
-                                            <p class="text-4xl font-black text-emerald-600">$45</p>
-                                            <p class="text-xs text-gray-600 font-bold">por hora</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-4 gap-4 mb-6 py-5 border-t border-b border-gray-200">
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Superficie</p>
-                                            <p class="text-sm font-black text-gray-900">Pasto Sintético</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Capacidad</p>
-                                            <p class="text-sm font-black text-gray-900">5v5</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Calificación</p>
-                                            <p class="text-sm font-black text-yellow-500">⭐⭐⭐⭐⭐</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Disponibles</p>
-                                            <p class="text-sm font-black text-emerald-600">8 horas</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-7">
-                                        <p class="text-xs font-black text-gray-700 mb-3">Servicios incluidos:</p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold">💡 Iluminación</span>
-                                            <span class="text-xs bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full font-bold">👕 Vestidores</span>
-                                            <span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-bold">🅿️ Estacionamiento</span>
-                                            <span class="text-xs bg-cyan-100 text-cyan-700 px-3 py-1.5 rounded-full font-bold">☕ Cafetería</span>
-                                        </div>
-                                    </div>
-
-                                    <button onclick="openHorarioModal(1, 'Cancha Premium - Fútbol 5', 'Sábado, 4 de Enero', 45)" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl text-lg">
-                                        Ver Horarios Disponibles →
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- CANCHA 2 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-300 transition group">
-                                <div class="p-8">
-                                    <div class="flex items-start justify-between mb-5">
-                                        <div class="flex-1">
-                                            <h3 class="text-xl font-black text-gray-900 group-hover:text-emerald-700 transition">⚽ Cancha Deportiva - Fútbol 7</h3>
-                                            <p class="text-sm text-gray-600 mt-2">📍 Complejo San Martín, Zona Este</p>
-                                            <p class="text-xs text-gray-500 mt-1">Teléfono: +56 9 9876 5432</p>
-                                        </div>
-                                        <div class="text-right ml-8">
-                                            <p class="text-4xl font-black text-emerald-600">$60</p>
-                                            <p class="text-xs text-gray-600 font-bold">por hora</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-4 gap-4 mb-6 py-5 border-t border-b border-gray-200">
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Superficie</p>
-                                            <p class="text-sm font-black text-gray-900">Pasto Sintético</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Capacidad</p>
-                                            <p class="text-sm font-black text-gray-900">7v7</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Calificación</p>
-                                            <p class="text-sm font-black text-yellow-500">⭐⭐⭐⭐</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Disponibles</p>
-                                            <p class="text-sm font-black text-emerald-600">10 horas</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-7">
-                                        <p class="text-xs font-black text-gray-700 mb-3">Servicios incluidos:</p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold">💡 Iluminación</span>
-                                            <span class="text-xs bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full font-bold">👕 Vestidores</span>
-                                            <span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-bold">🅿️ Estacionamiento</span>
-                                        </div>
-                                    </div>
-
-                                    <button onclick="openHorarioModal(2, 'Cancha Deportiva - Fútbol 7', 'Sábado, 4 de Enero', 60)" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl text-lg">
-                                        Ver Horarios Disponibles →
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- CANCHA 3 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-300 transition group">
-                                <div class="p-8">
-                                    <div class="flex items-start justify-between mb-5">
-                                        <div class="flex-1">
-                                            <h3 class="text-xl font-black text-gray-900 group-hover:text-emerald-700 transition">⚽ Estadio Municipal - Fútbol 11</h3>
-                                            <p class="text-sm text-gray-600 mt-2">📍 Parque Central, Zona Céntrica</p>
-                                            <p class="text-xs text-gray-500 mt-1">Teléfono: +56 9 5555 2222</p>
-                                        </div>
-                                        <div class="text-right ml-8">
-                                            <p class="text-4xl font-black text-emerald-600">$120</p>
-                                            <p class="text-xs text-gray-600 font-bold">por hora</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-4 gap-4 mb-6 py-5 border-t border-b border-gray-200">
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Superficie</p>
-                                            <p class="text-sm font-black text-gray-900">Pasto Natural</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Capacidad</p>
-                                            <p class="text-sm font-black text-gray-900">11v11</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Calificación</p>
-                                            <p class="text-sm font-black text-yellow-500">⭐⭐⭐⭐⭐</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Disponibles</p>
-                                            <p class="text-sm font-black text-emerald-600">9 horas</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-7">
-                                        <p class="text-xs font-black text-gray-700 mb-3">Servicios incluidos:</p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold">💡 Iluminación</span>
-                                            <span class="text-xs bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full font-bold">👕 Vestidores</span>
-                                            <span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-bold">🅿️ Estacionamiento</span>
-                                            <span class="text-xs bg-cyan-100 text-cyan-700 px-3 py-1.5 rounded-full font-bold">☕ Cafetería</span>
-                                            <span class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-full font-bold">🏃 Árbitro</span>
-                                        </div>
-                                    </div>
-
-                                    <button onclick="openHorarioModal(3, 'Estadio Municipal - Fútbol 11', 'Sábado, 4 de Enero', 120)" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl text-lg">
-                                        Ver Horarios Disponibles →
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- CATÁLOGO DE CANCHAS (DERECHA) -->
+                    <div class="lg:col-span-3">
+                        <h3 class="text-2xl font-black text-gray-900 mb-8">⚽ Canchas Disponibles</h3>
+                        <div id="canchasGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
                     </div>
                 </div>
-                <!-- FIN VISTA DE MES -->
-
-                <!-- VISTA DE SEMANA -->
-                <div id="weekView" class="hidden">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-10">
-                        <h2 class="text-3xl font-black text-gray-900 mb-8">📅 Vista de Semana</h2>
-                        
-                        <!-- NAVEGACIÓN SEMANAS -->
-                        <div class="flex items-center justify-between mb-10">
-                            <button class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition" onclick="previousWeek()">
-                                ← Semana Anterior
-                            </button>
-                            <h3 id="weekRange" class="text-2xl font-bold text-gray-900">4 - 10 de Enero</h3>
-                            <button class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg transition" onclick="nextWeek()">
-                                Semana Siguiente →
-                            </button>
-                        </div>
-
-                        <!-- DÍAS DE LA SEMANA -->
-                        <div class="grid grid-cols-7 gap-3 mb-8">
-                            <div class="bg-gradient-to-b from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-6 text-center">
-                                <p class="text-xs font-black text-gray-600 mb-2">LUN</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">4</button>
-                                <p class="text-xs text-gray-500 mt-2">8 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">MAR</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">5</button>
-                                <p class="text-xs text-gray-500 mt-2">10 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">MIÉ</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">6</button>
-                                <p class="text-xs text-gray-500 mt-2">9 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">JUE</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">7</button>
-                                <p class="text-xs text-gray-500 mt-2">12 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">VIE</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">8</button>
-                                <p class="text-xs text-gray-500 mt-2">7 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">SÁB</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">9</button>
-                                <p class="text-xs text-gray-500 mt-2">15 disponibles</p>
-                            </div>
-                            <div class="bg-white border border-gray-200 rounded-xl p-6 text-center hover:shadow-md transition">
-                                <p class="text-xs font-black text-gray-600 mb-2">DOM</p>
-                                <button class="w-full text-2xl font-black text-gray-900 hover:bg-emerald-100 p-4 rounded-lg transition">10</button>
-                                <p class="text-xs text-gray-500 mt-2">6 disponibles</p>
-                            </div>
-                        </div>
-
-                        <!-- INFO Y CANCHAS -->
-                        <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-2 border-emerald-200 rounded-xl p-6 mb-8">
-                            <h3 class="text-lg font-black text-gray-900 mb-2">📅 <span id="weekSelectedDateText">Semana del 4 al 10 de Enero de 2025</span></h3>
-                            <p class="text-sm text-emerald-700 font-bold">Se encontraron <span class="text-emerald-600">67 canchas disponibles</span> esta semana</p>
-                        </div>
-
-                        <!-- GRID DE CANCHAS (mismo que antes) -->
-                        <div id="weekCanchasGrid" class="space-y-5">
-                            <!-- CANCHA 1 -->
-                            <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-emerald-300 transition group">
-                                <div class="p-8">
-                                    <div class="flex items-start justify-between mb-5">
-                                        <div class="flex-1">
-                                            <h3 class="text-xl font-black text-gray-900 group-hover:text-emerald-700 transition">⚽ Cancha Premium - Fútbol 5</h3>
-                                            <p class="text-sm text-gray-600 mt-2">📍 Centro Deportivo Las Vegas, Zona Norte</p>
-                                            <p class="text-xs text-gray-500 mt-1">Teléfono: +56 9 1234 5678</p>
-                                        </div>
-                                        <div class="text-right ml-8">
-                                            <p class="text-4xl font-black text-emerald-600">$45</p>
-                                            <p class="text-xs text-gray-600 font-bold">por hora</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-4 gap-4 mb-6 py-5 border-t border-b border-gray-200">
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Superficie</p>
-                                            <p class="text-sm font-black text-gray-900">Pasto Sintético</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Capacidad</p>
-                                            <p class="text-sm font-black text-gray-900">5v5</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Calificación</p>
-                                            <p class="text-sm font-black text-yellow-500">⭐⭐⭐⭐⭐</p>
-                                        </div>
-                                        <div class="text-center">
-                                            <p class="text-xs text-gray-500 font-bold mb-2">Esta Semana</p>
-                                            <p class="text-sm font-black text-emerald-600">45 horas</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-7">
-                                        <p class="text-xs font-black text-gray-700 mb-3">Servicios incluidos:</p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold">💡 Iluminación</span>
-                                            <span class="text-xs bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full font-bold">👕 Vestidores</span>
-                                            <span class="text-xs bg-green-100 text-green-700 px-3 py-1.5 rounded-full font-bold">🅿️ Estacionamiento</span>
-                                            <span class="text-xs bg-cyan-100 text-cyan-700 px-3 py-1.5 rounded-full font-bold">☕ Cafetería</span>
-                                        </div>
-                                    </div>
-
-                                    <button onclick="openHorarioModal(1, 'Cancha Premium - Fútbol 5', 'Semana 4-10 Enero', 45)" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-4 rounded-xl transition duration-200 shadow-lg hover:shadow-xl text-lg">
-                                        Ver Horarios Disponibles →
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- FIN VISTA DE SEMANA -->
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
 </div>
 
-<!-- MODAL HORARIOS -->
-<div id="horarioModal" class="hidden fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        <!-- HEADER -->
+<!-- MODAL FILTROS -->
+<div id="filterModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8 sticky top-0 z-10 flex items-center justify-between">
+            <h2 class="text-2xl font-black">🔍 Filtrar</h2>
+            <button onclick="closeFilterModal()" class="text-white hover:bg-emerald-700 p-2.5 rounded-lg transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="p-8 space-y-6 overflow-y-auto">
+            <!-- TIPO DE CANCHA -->
             <div>
-                <h2 id="modalTitle" class="text-2xl font-black">⚽ Cancha Premium</h2>
-                <p id="modalSubtitle" class="text-emerald-100 mt-1 font-bold">Sábado, 4 de Enero de 2025</p>
+                <h4 class="font-bold text-gray-900 mb-3">⚽ Tipo de Cancha</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Fútbol 5</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Fútbol 7</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Fútbol 11</span>
+                </label>
             </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <!-- RANGO DE PRECIOS -->
+                <h4 class="font-bold text-gray-900 mb-3">💰 Rango de Precios</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="priceRange" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">S/ 0 - S/ 50</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="priceRange" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">S/ 50 - S/ 100</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="priceRange" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">S/ 100 - S/ 200</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="radio" name="priceRange" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">S/ 200 o más</span>
+                </label>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <!-- SUPERFICIE -->
+                <h4 class="font-bold text-gray-900 mb-3">🌿 Tipo de Superficie</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Pasto Natural</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Pasto Sintético</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Cemento</span>
+                </label>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <!-- CALIFICACIÓN -->
+                <h4 class="font-bold text-gray-900 mb-3">⭐ Calificación Mínima</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="rating" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">⭐⭐⭐⭐⭐ (5.0)</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="radio" name="rating" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">⭐⭐⭐⭐ (4.0+)</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="radio" name="rating" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">⭐⭐⭐ (3.0+)</span>
+                </label>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <!-- SERVICIOS -->
+                <h4 class="font-bold text-gray-900 mb-3">✨ Servicios Incluidos</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Iluminación</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Vestidores</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Estacionamiento</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Cafetería</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Árbitro Disponible</span>
+                </label>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <!-- DISPONIBILIDAD HORARIA -->
+                <h4 class="font-bold text-gray-900 mb-3">🕐 Disponibilidad Horaria</h4>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700">Mañana (6:00 - 12:00)</span>
+                </label>
+                <label class="flex items-center gap-3 mb-2">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Tarde (12:00 - 18:00)</span>
+                </label>
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" class="w-4 h-4 rounded accent-emerald-600" checked>
+                    <span class="text-sm text-gray-700">Noche (18:00 - 23:00)</span>
+                </label>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <button onclick="applyFilters()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black py-3 rounded-lg transition">
+                    ✓ Aplicar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HORARIOS Y PAGO -->
+<div id="horarioModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-8 sticky top-0 z-10 flex items-center justify-between">
+            <h2 id="modalTitle" class="text-2xl font-black">Completar Reserva</h2>
             <button onclick="closeHorarioModal()" class="text-white hover:bg-emerald-700 p-2.5 rounded-lg transition">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -599,70 +324,112 @@
             </button>
         </div>
 
-        <!-- CONTENIDO -->
         <div class="p-10">
             <h3 class="text-2xl font-black text-gray-900 mb-8">🕐 Selecciona un horario</h3>
-            <div class="grid grid-cols-3 gap-4 mb-10">
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="08:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">08:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+            <div class="grid grid-cols-4 gap-3 mb-10">
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="08:00">
+                    <p class="font-black text-gray-900 text-xl">08:00</p>
                 </button>
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="09:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">09:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="09:00">
+                    <p class="font-black text-gray-900 text-xl">09:00</p>
                 </button>
-                <button class="hourButton booked group p-6 border-2 border-red-200 rounded-xl bg-red-50 cursor-not-allowed opacity-60" data-hora="10:00">
-                    <p class="font-black text-red-600 text-2xl">10:00</p>
-                    <p class="text-xs text-red-500 font-bold mt-2">Ocupado</p>
+                <button class="hourButton booked p-5 border-2 border-red-200 rounded-xl bg-red-50 cursor-not-allowed opacity-60" data-hora="10:00">
+                    <p class="font-black text-red-600 text-xl">10:00</p>
                 </button>
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="11:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">11:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="11:00">
+                    <p class="font-black text-gray-900 text-xl">11:00</p>
                 </button>
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="14:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">14:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="14:00">
+                    <p class="font-black text-gray-900 text-xl">14:00</p>
                 </button>
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="15:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">15:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="15:00">
+                    <p class="font-black text-gray-900 text-xl">15:00</p>
                 </button>
-                <button class="hourButton booked group p-6 border-2 border-red-200 rounded-xl bg-red-50 cursor-not-allowed opacity-60" data-hora="16:00">
-                    <p class="font-black text-red-600 text-2xl">16:00</p>
-                    <p class="text-xs text-red-500 font-bold mt-2">Ocupado</p>
+                <button class="hourButton booked p-5 border-2 border-red-200 rounded-xl bg-red-50 cursor-not-allowed opacity-60" data-hora="16:00">
+                    <p class="font-black text-red-600 text-xl">16:00</p>
                 </button>
-                <button class="hourButton available group p-6 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="17:00">
-                    <p class="font-black text-gray-900 group-hover:text-emerald-700 text-2xl">17:00</p>
-                    <p class="text-xs text-gray-500 group-hover:text-emerald-600 font-bold mt-2">Disponible</p>
+                <button class="hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer" data-hora="17:00">
+                    <p class="font-black text-gray-900 text-xl">17:00</p>
                 </button>
             </div>
 
-            <!-- RESUMEN -->
             <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl p-8 mb-8">
-                <h3 class="font-black text-gray-900 mb-5 text-xl">📋 Resumen de tu Reserva</h3>
-                <div class="grid grid-cols-3 gap-8">
+                <h3 class="font-black text-gray-900 mb-5">📋 Resumen</h3>
+                <div class="grid grid-cols-3 gap-6">
                     <div>
                         <p class="text-xs text-gray-600 font-black mb-2">HORARIO</p>
-                        <p id="detalleHora" class="text-2xl font-black text-emerald-700">Selecciona uno</p>
+                        <p id="detalleHora" class="text-xl font-black text-emerald-700">Selecciona uno</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-600 font-black mb-2">DURACIÓN</p>
-                        <p class="text-2xl font-black text-emerald-700">1 hora</p>
+                        <p class="text-xl font-black text-emerald-700">1 hora</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-600 font-black mb-2">TOTAL</p>
-                        <p id="detallePrecio" class="text-2xl font-black text-emerald-700">$45</p>
+                        <p id="detallePrecio" class="text-xl font-black text-emerald-700">S/ 45</p>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTONES -->
+            <div class="bg-white border-2 border-gray-200 rounded-xl p-8 mb-8">
+                <h3 class="font-black text-gray-900 mb-5">💳 Método de Pago (Perú)</h3>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="credit_card" class="hidden" checked>
+                        <div class="border-2 border-emerald-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">💳</p>
+                            <p class="font-black text-gray-900 text-xs">Tarjeta de Crédito</p>
+                        </div>
+                    </label>
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="debit_card" class="hidden">
+                        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">🏦</p>
+                            <p class="font-black text-gray-900 text-xs">Tarjeta de Débito</p>
+                        </div>
+                    </label>
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="yape" class="hidden">
+                        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">📱</p>
+                            <p class="font-black text-gray-900 text-xs">Yapeí</p>
+                        </div>
+                    </label>
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="plin" class="hidden">
+                        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">💰</p>
+                            <p class="font-black text-gray-900 text-xs">Plin</p>
+                        </div>
+                    </label>
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="transfer" class="hidden">
+                        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">🏪</p>
+                            <p class="font-black text-gray-900 text-xs">Transferencia Bancaria</p>
+                        </div>
+                    </label>
+                    <label class="paymentMethod cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="cash" class="hidden">
+                        <div class="border-2 border-gray-200 rounded-xl p-4 hover:border-emerald-600 hover:bg-emerald-50 transition text-center">
+                            <p class="text-2xl mb-2">💵</p>
+                            <p class="font-black text-gray-900 text-xs">Efectivo</p>
+                        </div>
+                    </label>
+                </div>
+
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" id="acceptTerms" class="w-5 h-5 rounded accent-emerald-600">
+                    <span class="text-sm text-gray-700 font-medium">Acepto los <span class="font-bold">términos y condiciones</span></span>
+                </label>
+            </div>
+
             <div class="flex gap-4 justify-end">
-                <button onclick="closeHorarioModal()" class="px-8 py-4 border-2 border-gray-300 text-gray-900 font-black rounded-xl hover:bg-gray-50 transition text-lg">
+                <button onclick="closeHorarioModal()" class="px-8 py-4 border-2 border-gray-300 text-gray-900 font-black rounded-xl hover:bg-gray-50 transition">
                     Cancelar
                 </button>
-                <button onclick="confirmarReserva()" class="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-xl transition shadow-lg text-lg" disabled id="confirmarBtn">
-                    ✓ Confirmar Reserva
+                <button onclick="procesarPago()" class="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-xl transition shadow-lg" disabled id="pagarBtn">
+                    💳 Pagar
                 </button>
             </div>
         </div>
