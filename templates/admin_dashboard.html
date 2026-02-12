@@ -1,425 +1,501 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% load static %}
 
+{% block title %}Dashboard | CANCHAYA{% endblock %}
+
+{% block extra_css %}
+<!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js" defer></script>
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Fuente Inter -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-</style>
+    /* ===== ÚNICO CSS PERSONALIZADO ===== */
+    /* Fuente global */
+    * { font-family: 'Inter', sans-serif; }
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-    
-    <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 w-72 h-screen bg-slate-800 border-r border-slate-700 overflow-y-auto z-50 flex flex-col">
+    /* Animación pulse para skeletons (Tailwind CDN no incluye animate-pulse completo) */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    .animate-pulse-slow {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* ===== FOOTER JAMÁS TAPADO POR EL SIDEBAR ===== */
+    /* Selecciona cualquier footer que esté fuera del dashboard */
+    body > footer,
+    footer:not(#sidebar):not([class*="sidebar"]),
+    .footer,
+    [class*="footer"]:not(.inside-dashboard) {
+        transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    @media (min-width: 1024px) {
+        body > footer,
+        footer:not(#sidebar):not([class*="sidebar"]),
+        .footer,
+        [class*="footer"]:not(.inside-dashboard) {
+            margin-left: 18rem !important;      /* w-72 */
+            width: calc(100% - 18rem) !important;
+            box-sizing: border-box;
+        }
+    }
+
+    @media (max-width: 1023px) {
+        body > footer,
+        footer:not(#sidebar):not([class*="sidebar"]),
+        .footer,
+        [class*="footer"]:not(.inside-dashboard) {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+    }
+
+    /* El sidebar nunca debe heredar esas reglas */
+    #sidebar, .sidebar, [class*="sidebar"] {
+        margin-left: 0 !important;
+        width: 18rem !important;
+    }
+    /* ============================================ */
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Fondo claro, texto oscuro - 100% Tailwind -->
+<div class="min-h-screen bg-slate-50">
+
+    <!-- Botón hamburguesa móvil (debajo del header) -->
+    <button id="sidebarToggle" class="lg:hidden fixed top-20 left-4 z-50 p-2.5 rounded-lg bg-white border border-slate-200 text-slate-700 shadow-md hover:bg-slate-100 transition">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- ========= SIDEBAR FIJO (DEBAJO DEL HEADER) ========= -->
+    <aside id="sidebar" class="fixed left-0 top-16 w-72 h-[calc(100vh-4rem)] bg-white border-r border-slate-200 shadow-lg z-40 flex flex-col transition-transform duration-300 -translate-x-full lg:translate-x-0 overflow-y-auto">
         <div class="p-6 space-y-6 flex-1">
             <!-- Logo -->
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-2xl shadow-lg flex-shrink-0">
+                <div class="w-12 h-12 rounded-lg bg-emerald-600 flex items-center justify-center text-2xl text-white shadow-md">
                     ⚽
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white whitespace-nowrap">CANCHAYA</h1>
-                    <p class="text-xs text-slate-400 whitespace-nowrap">Admin Panel</p>
+                    <h1 class="text-xl font-black text-slate-800 tracking-tight">CANCHAYA</h1>
+                    <p class="text-xs text-slate-500 uppercase tracking-wider">Administrador</p>
                 </div>
             </div>
 
-            <!-- Navigation -->
-            <nav class="space-y-1">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-500/10 text-emerald-400 border-l-4 border-emerald-500 font-medium text-sm hover:bg-emerald-500/20 transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
+            <!-- Navegación principal -->
+            <nav class="space-y-1 mt-6">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 font-medium text-sm hover:bg-emerald-100 transition" aria-current="page">
+                    <i class="fas fa-home w-5 text-center"></i>
                     <span>Dashboard</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition hover:pl-6">
+                    <i class="fas fa-calendar-alt w-5 text-center"></i>
                     <span>Reservas</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition hover:pl-6">
+                    <i class="fas fa-users w-5 text-center"></i>
                     <span>Usuarios</span>
                 </a>
             </nav>
 
-            <!-- Divider -->
-            <div class="border-t border-slate-700"></div>
+            <div class="border-t border-slate-200 my-6"></div>
 
-            <!-- Análisis Section -->
-            <nav class="space-y-1">
-                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Análisis</p>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
+            <!-- Análisis -->
+            <div class="space-y-1">
+                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Análisis</p>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition hover:pl-6">
+                    <i class="fas fa-chart-line w-5 text-center"></i>
                     <span>Estadísticas</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition hover:pl-6">
+                    <i class="fas fa-file-alt w-5 text-center"></i>
                     <span>Reportes</span>
                 </a>
-            </nav>
+            </div>
 
-            <!-- Divider -->
-            <div class="border-t border-slate-700"></div>
-
-            <!-- Finanzas Section -->
-            <nav class="space-y-1">
-                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Finanzas</p>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                    </svg>
+            <!-- Finanzas -->
+            <div class="space-y-1">
+                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Finanzas</p>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition hover:pl-6">
+                    <i class="fas fa-credit-card w-5 text-center"></i>
                     <span>Pagos</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition hover:pl-6">
+                    <i class="fas fa-file-invoice w-5 text-center"></i>
                     <span>Facturación</span>
                 </a>
-            </nav>
+            </div>
 
-            <!-- Divider -->
-            <div class="border-t border-slate-700"></div>
+            <div class="border-t border-slate-200 my-6"></div>
 
-            <!-- Sistema Section -->
-            <nav class="space-y-1">
-                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Sistema</p>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 font-medium text-sm transition">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+            <!-- Sistema -->
+            <div class="space-y-1">
+                <p class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Sistema</p>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 hover:bg-slate-100 transition hover:pl-6">
+                    <i class="fas fa-cog w-5 text-center"></i>
                     <span>Configuración</span>
                 </a>
-            </nav>
+            </div>
         </div>
 
-        <!-- User Profile (Bottom) -->
-        <div class="p-6 border-t border-slate-700">
-            <button class="w-full flex items-center gap-3 p-3 rounded-lg bg-slate-700 hover:bg-slate-600 transition">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                    A
+        <!-- Perfil de usuario -->
+        <div class="p-5 m-4 bg-slate-100 rounded-xl border border-slate-200">
+            <button class="w-full flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow">
+                    {{ user.first_name|first|default:"A" }}
                 </div>
                 <div class="text-left flex-1">
-                    <p class="text-sm font-semibold text-white">Administrador</p>
-                    <p class="text-xs text-slate-400 truncate">admin@canchaya.com</p>
+                    <p class="text-sm font-semibold text-slate-800">{{ user.get_full_name|default:"Administrador" }}</p>
+                    <p class="text-xs text-slate-500 truncate">{{ user.email|default:"admin@canchaya.com" }}</p>
                 </div>
+                <i class="fas fa-chevron-right text-slate-400 text-sm"></i>
             </button>
         </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="ml-72">
-        <!-- Page Content -->
-        <main class="p-6 space-y-6">
-            
-            <!-- Welcome Card -->
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-8 text-white shadow-xl">
-                <div class="flex items-center justify-between flex-wrap gap-4">
+    <!-- ========= MAIN CONTENT (DESPLAZADO A LA DERECHA) ========= -->
+    <div id="mainContent" class="lg:ml-72 transition-all duration-300 min-h-screen pt-16">
+        <main class="p-4 md:p-8 max-w-7xl mx-auto space-y-6 pb-16"> <!-- pb-16 da aire antes del footer -->
+
+            <!-- ===== TARJETA DE BIENVENIDA ===== -->
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-6 md:p-8 text-white shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <h1 class="text-4xl font-bold mb-2">¡Bienvenido de vuelta, Administrador! 👋</h1>
-                        <p class="text-emerald-100">Hoy es <span id="currentDate">miércoles, 4 de febrero de 2026</span>. Tienes <strong>12</strong> reservas pendientes.</p>
+                        <h2 class="text-2xl md:text-4xl font-bold mb-2">¡Bienvenido, {{ user.first_name|default:"Admin" }}! 👋</h2>
+                        <p class="text-emerald-100 flex items-center gap-2">
+                            <i class="fas fa-calendar-check"></i>
+                            Hoy es <span id="currentDate" class="font-semibold">{{ today|date:"l, j \d\e F \d\e Y" }}</span> · 
+                            <span class="inline-flex items-center gap-1"><i class="fas fa-clock"></i> <span id="currentTime">--:--:--</span></span>
+                        </p>
                     </div>
-                    <div class="text-right">
-                        <div class="text-5xl font-bold" id="currentTime">11:53</div>
-                        <p class="text-emerald-100 text-sm">Hora del dashboard</p>
+                    <div class="bg-white/20 px-5 py-3 rounded-xl backdrop-blur-sm border border-white/30">
+                        <p class="text-xs uppercase tracking-wider text-emerald-100">Reservas hoy</p>
+                        <p class="text-3xl font-bold text-white">{{ pending_reservations|default:"12" }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Stat Card 1 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-emerald-500/50 transition group cursor-pointer">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl">
-                            ⚽
+            <!-- ===== TARJETAS DE ESTADÍSTICAS ===== -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Reservas totales -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl">
+                            <i class="fas fa-futbol"></i>
                         </div>
-                        <div class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">
-                            <span>↑</span> 12%
-                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            <i class="fas fa-arrow-up mr-1"></i>12%
+                        </span>
                     </div>
-                    <p class="text-3xl font-bold text-white">247</p>
-                    <p class="text-slate-400 text-sm font-medium">Reservas Totales</p>
+                    <p class="text-3xl font-bold text-slate-800">{{ total_reservations|default:"247" }}</p>
+                    <p class="text-slate-500 text-sm font-medium mt-1">Reservas Totales</p>
                 </div>
-
-                <!-- Stat Card 2 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-emerald-500/50 transition group cursor-pointer">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center text-2xl">
-                            💰
+                <!-- Ingresos del mes -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl">
+                            <i class="fas fa-coins"></i>
                         </div>
-                        <div class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">
-                            <span>↑</span> 8.5%
-                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            <i class="fas fa-arrow-up mr-1"></i>8.5%
+                        </span>
                     </div>
-                    <p class="text-3xl font-bold text-white">S/. 15,420</p>
-                    <p class="text-slate-400 text-sm font-medium">Ingresos del Mes</p>
+                    <p class="text-3xl font-bold text-slate-800">S/ {{ monthly_revenue|default:"15,420" }}</p>
+                    <p class="text-slate-500 text-sm font-medium mt-1">Ingresos del Mes</p>
                 </div>
-
-                <!-- Stat Card 3 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-emerald-500/50 transition group cursor-pointer">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center text-2xl">
-                            🏟️
+                <!-- Canchas activas -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-2xl">
+                            <i class="fas fa-tree"></i>
                         </div>
-                        <div class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-red-500/20 text-red-400">
-                            <span>↓</span> 3%
-                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+                            <i class="fas fa-arrow-down mr-1"></i>3%
+                        </span>
                     </div>
-                    <p class="text-3xl font-bold text-white">18</p>
-                    <p class="text-slate-400 text-sm font-medium">Canchas Activas</p>
+                    <p class="text-3xl font-bold text-slate-800">{{ active_courts|default:"18" }}</p>
+                    <p class="text-slate-500 text-sm font-medium mt-1">Canchas Activas</p>
                 </div>
-
-                <!-- Stat Card 4 -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-emerald-500/50 transition group cursor-pointer">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-12 h-12 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl">
-                            👥
+                <!-- Nuevos usuarios -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-2xl">
+                            <i class="fas fa-user-plus"></i>
                         </div>
-                        <div class="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">
-                            <span>↑</span> 24%
-                        </div>
+                        <span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+                            <i class="fas fa-arrow-up mr-1"></i>24%
+                        </span>
                     </div>
-                    <p class="text-3xl font-bold text-white">86</p>
-                    <p class="text-slate-400 text-sm font-medium">Nuevos Usuarios</p>
+                    <p class="text-3xl font-bold text-slate-800">{{ new_users|default:"86" }}</p>
+                    <p class="text-slate-500 text-sm font-medium mt-1">Nuevos Usuarios</p>
                 </div>
-
             </div>
 
-            <!-- Quick Actions -->
+            <!-- ===== ACCIONES RÁPIDAS ===== -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
-                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">📅</div>
-                    <p class="text-slate-200 font-semibold text-sm">Nueva Reserva</p>
+                <button class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                    <div class="text-4xl mb-2 text-emerald-600 transition-transform group-hover:scale-110">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold text-sm">Nueva Reserva</p>
                 </button>
-                
-                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
-                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">➕</div>
-                    <p class="text-slate-200 font-semibold text-sm">Agregar Cancha</p>
+                <button class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                    <div class="text-4xl mb-2 text-emerald-600 transition-transform group-hover:scale-110">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold text-sm">Agregar Cancha</p>
                 </button>
-                
-                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
-                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">📊</div>
-                    <p class="text-slate-200 font-semibold text-sm">Generar Reporte</p>
+                <button class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                    <div class="text-4xl mb-2 text-emerald-600 transition-transform group-hover:scale-110">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold text-sm">Generar Reporte</p>
                 </button>
-                
-                <button class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-xl p-6 hover:border-emerald-500 hover:bg-slate-700 transition-all duration-300 group">
-                    <div class="text-4xl mb-3 transition-transform group-hover:scale-110">🔔</div>
-                    <p class="text-slate-200 font-semibold text-sm">Enviar Notificación</p>
+                <button class="bg-white border-2 border-dashed border-slate-300 rounded-xl p-5 hover:border-emerald-500 hover:bg-emerald-50 transition-all group">
+                    <div class="text-4xl mb-2 text-emerald-600 transition-transform group-hover:scale-110">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <p class="text-slate-700 font-semibold text-sm">Enviar Notificación</p>
                 </button>
             </div>
 
-            <!-- Main Content Grid -->
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                
-                <!-- Recent Reservations -->
-                <div class="xl:col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-slate-50">Reservas Recientes</h3>
-                        <button class="px-4 py-2 text-emerald-400 hover:text-emerald-300 text-sm font-semibold flex items-center gap-1">
-                            Ver todas
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-slate-700">
-                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Cliente</th>
-                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Cancha</th>
-                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Fecha/Hora</th>
-                                    <th class="text-left py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Estado</th>
-                                    <th class="text-right py-4 px-4 text-slate-400 font-semibold text-sm uppercase tracking-wider">Monto</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="font-semibold text-slate-100">Juan Pérez</p>
-                                            <p class="text-sm text-slate-400">juan@email.com</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 7 #3</td>
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="text-slate-200">30/01/2026</p>
-                                            <p class="text-sm text-slate-400">18:00 - 19:00</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4">
-                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/20 text-green-400">
-                                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                            <span>Confirmada</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-4 text-right">
-                                        <span class="text-emerald-400 font-bold text-lg">S/. 80.00</span>
-                                    </td>
-                                </tr>
-                                
-                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="font-semibold text-slate-100">María García</p>
-                                            <p class="text-sm text-slate-400">maria@email.com</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 5 #1</td>
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="text-slate-200">31/01/2026</p>
-                                            <p class="text-sm text-slate-400">20:00 - 21:00</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4">
-                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-yellow-500/20 text-yellow-400">
-                                            <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
-                                            <span>Pendiente</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-4 text-right">
-                                        <span class="text-emerald-400 font-bold text-lg">S/. 60.00</span>
-                                    </td>
-                                </tr>
-                                
-                                <tr class="border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors">
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="font-semibold text-slate-100">Carlos López</p>
-                                            <p class="text-sm text-slate-400">carlos@email.com</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4 text-slate-200">Cancha Fútbol 11 #1</td>
-                                    <td class="py-4 px-4">
-                                        <div>
-                                            <p class="text-slate-200">01/02/2026</p>
-                                            <p class="text-sm text-slate-400">16:00 - 17:30</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-4">
-                                        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold bg-green-500/20 text-green-400">
-                                            <span class="w-2 h-2 rounded-full bg-green-400"></span>
-                                            <span>Confirmada</span>
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-4 text-right">
-                                        <span class="text-emerald-400 font-bold text-lg">S/. 120.00</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Activity Feed -->
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-bold text-slate-50">Actividad Reciente</h3>
-                        <button class="text-emerald-400 hover:text-emerald-300 text-sm font-semibold">
-                            Ver todo
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-4 max-h-[600px] overflow-y-auto">
-                        <div class="flex gap-4 p-4 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                            <div class="w-12 h-12 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center text-2xl flex-shrink-0">✓</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-slate-100 mb-1">Nueva reserva confirmada</p>
-                                <p class="text-sm text-slate-400 mb-2">Juan Pérez reservó Cancha Fútbol 7 #3</p>
-                                <p class="text-xs text-slate-500">Hace 15 minutos</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-4 p-4 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                            <div class="w-12 h-12 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center justify-center text-2xl flex-shrink-0">★</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-slate-100 mb-1">Pago recibido</p>
-                                <p class="text-sm text-slate-400 mb-2">S/. 80.00 - Reserva #R2547</p>
-                                <p class="text-xs text-slate-500">Hace 1 hora</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-4 p-4 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                            <div class="w-12 h-12 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center text-2xl flex-shrink-0">⚠</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-slate-100 mb-1">Reserva cancelada</p>
-                                <p class="text-sm text-slate-400 mb-2">María García canceló su reserva</p>
-                                <p class="text-xs text-slate-500">Hace 2 horas</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex gap-4 p-4 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer">
-                            <div class="w-12 h-12 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center text-2xl flex-shrink-0">✓</div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-slate-100 mb-1">Nueva cancha registrada</p>
-                                <p class="text-sm text-slate-400 mb-2">Cancha Fútbol 11 "El Estadio"</p>
-                                <p class="text-xs text-slate-500">Hace 3 horas</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Section -->
+            <!-- ===== GRÁFICOS (CHARTS) ===== -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- Revenue Chart -->
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg">
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-white">Ingresos Mensuales</h3>
-                        <p class="text-slate-400 text-sm mt-1">Tendencia de ingresos últimos 6 meses</p>
+                <!-- Gráfico 1: Ingresos mensuales -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fas fa-chart-line text-emerald-600"></i> Ingresos Mensuales
+                            </h3>
+                            <p class="text-sm text-slate-500">Últimos 6 meses</p>
+                        </div>
+                        <select class="bg-slate-100 text-slate-700 text-sm rounded-lg px-3 py-2 border border-slate-300 focus:ring-2 focus:ring-emerald-500">
+                            <option>Últimos 6 meses</option>
+                            <option>Último año</option>
+                        </select>
                     </div>
-                    <div style="height: 300px;">
+                    <div class="relative h-64">
                         <canvas id="chart1"></canvas>
+                        <div id="chart1-loading" class="absolute inset-0 bg-slate-200 rounded-lg animate-pulse-slow"></div>
                     </div>
-                    <p class="text-xs text-slate-500 mt-4 text-center">Última actualización: Hoy</p>
                 </div>
-                
-                <!-- Occupancy Chart -->
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg">
-                    <div class="mb-6">
-                        <h3 class="text-xl font-bold text-white">Ocupación de Canchas</h3>
-                        <p class="text-slate-400 text-sm mt-1">Ocupación promedio por día de la semana</p>
+                <!-- Gráfico 2: Ocupación semanal -->
+                <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fas fa-chart-bar text-emerald-600"></i> Ocupación Semanal
+                            </h3>
+                            <p class="text-sm text-slate-500">Promedio por día</p>
+                        </div>
+                        <span class="bg-slate-100 text-slate-700 text-sm px-3 py-1.5 rounded-lg border border-slate-300">
+                            <i class="fas fa-percent mr-1"></i> 80% prom.
+                        </span>
                     </div>
-                    <div style="height: 300px;">
+                    <div class="relative h-64">
                         <canvas id="chart2"></canvas>
+                        <div id="chart2-loading" class="absolute inset-0 bg-slate-200 rounded-lg animate-pulse-slow"></div>
                     </div>
-                    <p class="text-xs text-slate-500 mt-4 text-center">Última actualización: Hoy</p>
                 </div>
-
+                <!-- Gráfico 3: Distribución por tipo de cancha -->
+                <div class="lg:col-span-2 xl:col-span-1 bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-chart-pie text-emerald-600"></i> Distribución por Tipo
+                        </h3>
+                        <p class="text-sm text-slate-500">Porcentaje de uso</p>
+                    </div>
+                    <div class="relative h-64">
+                        <canvas id="chart3"></canvas>
+                        <div id="chart3-loading" class="absolute inset-0 bg-slate-200 rounded-lg animate-pulse-slow"></div>
+                    </div>
+                </div>
             </div>
 
+            <!-- ===== TABLA DE RESERVAS RECIENTES ===== -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-list-check text-emerald-600"></i> Reservas Recientes
+                        </h3>
+                        <p class="text-sm text-slate-500">Últimas reservas registradas</p>
+                    </div>
+                    <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition border border-emerald-200">
+                        Ver todas <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-200">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold uppercase text-xs">Cliente</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold uppercase text-xs">Cancha</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold uppercase text-xs">Fecha / Hora</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold uppercase text-xs">Estado</th>
+                                <th class="text-right py-3 px-4 text-slate-600 font-semibold uppercase text-xs">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reserva in recent_reservations %}
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                            <i class="fas fa-user text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-slate-800">{{ reserva.cliente.nombre }}</p>
+                                            <p class="text-xs text-slate-500">{{ reserva.cliente.email }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4 text-slate-700">{{ reserva.cancha.nombre }}</td>
+                                <td class="py-3 px-4">
+                                    <p class="text-slate-700">{{ reserva.fecha|date:"d/m/Y" }}</p>
+                                    <p class="text-xs text-slate-500">{{ reserva.hora_inicio|time:"H:i" }} - {{ reserva.hora_fin|time:"H:i" }}</p>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium 
+                                        {% if reserva.estado == 'confirmada' %}bg-green-100 text-green-800 border border-green-300
+                                        {% elif reserva.estado == 'pendiente' %}bg-yellow-100 text-yellow-800 border border-yellow-300
+                                        {% else %}bg-red-100 text-red-800 border border-red-300{% endif %}">
+                                        <i class="fas fa-circle text-[6px]"></i>
+                                        {{ reserva.get_estado_display|default:reserva.estado|capfirst }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-right font-semibold text-emerald-700">S/ {{ reserva.monto|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-slate-500">
+                                    <i class="fas fa-calendar-xmark text-3xl mb-2 opacity-50"></i>
+                                    <p>No hay reservas recientes.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== ACTIVIDAD RECIENTE ===== -->
+            <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-bolt text-emerald-600"></i> Actividad Reciente
+                        </h3>
+                        <p class="text-sm text-slate-500">Eventos del sistema</p>
+                    </div>
+                    <a href="#" class="text-emerald-700 hover:text-emerald-800 text-sm font-semibold">Ver todo <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-50 transition group">
+                        <div class="w-10 h-10 rounded-lg bg-green-100 text-green-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800 group-hover:text-emerald-700 transition">Nueva reserva confirmada</p>
+                            <p class="text-sm text-slate-600">Juan Pérez · Cancha Fútbol 7 #3</p>
+                            <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock mr-1"></i> Hace 15 minutos</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-400 group-hover:text-emerald-600 transition"></i>
+                    </div>
+                    <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-50 transition group">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-100 text-yellow-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800 group-hover:text-emerald-700 transition">Pago recibido</p>
+                            <p class="text-sm text-slate-600">S/ 80.00 · Reserva #R2547</p>
+                            <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock mr-1"></i> Hace 1 hora</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-400 group-hover:text-emerald-600 transition"></i>
+                    </div>
+                    <div class="flex items-start gap-4 p-3 rounded-lg hover:bg-slate-50 transition group">
+                        <div class="w-10 h-10 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-slate-800 group-hover:text-emerald-700 transition">Reserva cancelada</p>
+                            <p class="text-sm text-slate-600">María García canceló su reserva</p>
+                            <p class="text-xs text-slate-400 mt-1"><i class="far fa-clock mr-1"></i> Hace 2 horas</p>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-400 group-hover:text-emerald-600 transition"></i>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
-
 </div>
 
-{% load static %}
+<!-- ===== SCRIPT DEL DASHBOARD (CHARTS Y RELOJ) ===== -->
 <script src="{% static 'js/dashboard.js' %}"></script>
 
+<!-- ===== SCRIPT DE AJUSTES: FOOTER, FECHA, SKELETONS, SIDEBAR ===== -->
+<script>
+    (function() {
+        // ----- SIDEBAR TOGGLE (MÓVIL) -----
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                sidebar.classList.toggle('translate-x-0');
+                // Pequeño retraso para que el footer se ajuste después de la animación
+                setTimeout(adjustFooter, 50);
+            });
+        }
+
+        // ----- FECHA DINÁMICA -----
+        const dateEl = document.getElementById('currentDate');
+        if (dateEl) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateEl.textContent = new Date().toLocaleDateString('es-ES', options);
+        }
+
+        // ----- OCULTAR SKELETONS DE GRÁFICOS (FALLBACK) -----
+        setTimeout(() => {
+            document.querySelectorAll('[id$="-loading"]').forEach(el => el.style.display = 'none');
+        }, 800);
+
+        // ----- 🚨 AJUSTE UNIVERSAL DEL FOOTER (NUNCA TAPADO) 🚨 -----
+        function adjustFooter() {
+            const footers = document.querySelectorAll('footer');
+            const isLargeScreen = window.innerWidth >= 1024;
+
+            footers.forEach(footer => {
+                // Ignorar si el footer está dentro del sidebar (no debería ocurrir)
+                if (footer.closest('#sidebar')) return;
+
+                if (isLargeScreen) {
+                    footer.style.marginLeft = '18rem';
+                    footer.style.width = 'calc(100% - 18rem)';
+                    footer.style.boxSizing = 'border-box';
+                } else {
+                    footer.style.marginLeft = '0';
+                    footer.style.width = '100%';
+                }
+            });
+        }
+
+        // Ejecutar al cargar, al redimensionar y cuando cambie el sidebar
+        adjustFooter();
+        window.addEventListener('resize', adjustFooter);
+
+        // Observador por si el footer se carga dinámicamente (AJAX, etc.)
+        const observer = new MutationObserver(adjustFooter);
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+</script>
 {% endblock %}

@@ -5,9 +5,18 @@ let currentStep = 1;
 let calendarMonth = 0;
 let calendarYear = 2025;
 let selectedCalendarDate = null;
-let selectedHora = null;
+
+// Array de reservas: cada elemento = { canchaId, canchaNombre, hora, precioHora }
+let reservas = [];
+
 let currentCancha = null;
 let currentPrecio = 0;
+let currentCanchaNombre = '';
+
+// Variables para cervezas
+let beerPricePerBox = 50;
+let beerQuantity = 0;
+let beerTotal = 0;
 
 let userPreferences = {
     hour: null,
@@ -20,10 +29,8 @@ const monthNames = [
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
 
-const weekdayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-
 // =====================================
-// ONBOARDING - PASO 1: HORARIO
+// ONBOARDING
 // =====================================
 function nextStep() {
     if (currentStep === 1) {
@@ -45,17 +52,11 @@ function nextStep() {
     updateOnboardingUI();
 }
 
-// =====================================
-// ONBOARDING - PASO ANTERIOR
-// =====================================
 function prevStep() {
     currentStep--;
     updateOnboardingUI();
 }
 
-// =====================================
-// ACTUALIZAR UI DEL ONBOARDING
-// =====================================
 function updateOnboardingUI() {
     document.querySelectorAll('[id^="step"]').forEach(el => el.classList.add('hidden'));
     document.getElementById(`step${currentStep}`).classList.remove('hidden');
@@ -63,9 +64,6 @@ function updateOnboardingUI() {
     document.getElementById('progressBar').style.width = progress + '%';
 }
 
-// =====================================
-// USAR GPS PARA UBICACIÓN
-// =====================================
 function useGPS() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -83,9 +81,6 @@ function useGPS() {
     }
 }
 
-// =====================================
-// COMPLETAR ONBOARDING
-// =====================================
 function completeOnboarding() {
     const city = document.getElementById('citySelect').value || userPreferences.city;
     
@@ -101,11 +96,9 @@ function completeOnboarding() {
 
     userPreferences.city = city;
 
-    // Ocultar modal y mostrar pantalla principal
     document.getElementById('onboardingModal').classList.add('hidden');
     document.getElementById('mainScreen').classList.remove('hidden');
 
-    // Actualizar header
     const dateObj = new Date(userPreferences.date);
     const dateStr = dateObj.toLocaleDateString('es-ES', {
         weekday: 'long',
@@ -115,14 +108,13 @@ function completeOnboarding() {
     });
     document.getElementById('headerInfo').textContent = `${userPreferences.hour} • ${dateStr} • ${userPreferences.city}`;
 
-    // Generar calendario y canchas
     generateCalendar();
     selectCalendarDate(dateObj.getDate());
     generateCanchasGrid();
 }
 
 // =====================================
-// GENERAR CALENDARIO
+// CALENDARIO
 // =====================================
 function generateCalendar() {
     const calendarGrid = document.getElementById('calendarGrid');
@@ -134,7 +126,6 @@ function generateCalendar() {
     const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
     const prevDaysInMonth = new Date(calendarYear, calendarMonth, 0).getDate();
 
-    // Días del mes anterior
     for (let i = firstDay - 1; i >= 0; i--) {
         const btn = document.createElement('button');
         btn.className = 'text-center py-3 rounded-lg font-semibold text-gray-400 bg-gray-100 cursor-default';
@@ -143,7 +134,6 @@ function generateCalendar() {
         calendarGrid.appendChild(btn);
     }
 
-    // Días del mes actual
     for (let day = 1; day <= daysInMonth; day++) {
         const btn = document.createElement('button');
         const isToday = day === 4;
@@ -167,7 +157,6 @@ function generateCalendar() {
         calendarGrid.appendChild(btn);
     }
 
-    // Días del mes siguiente
     const totalCells = calendarGrid.children.length;
     const remainingCells = 42 - totalCells;
     for (let i = 1; i <= remainingCells; i++) {
@@ -179,9 +168,6 @@ function generateCalendar() {
     }
 }
 
-// =====================================
-// SELECCIONAR FECHA DEL CALENDARIO
-// =====================================
 function selectCalendarDate(day) {
     selectedCalendarDate = new Date(calendarYear, calendarMonth, day);
     const dateStr = selectedCalendarDate.toLocaleDateString('es-ES', {
@@ -195,9 +181,6 @@ function selectCalendarDate(day) {
     generateCalendar();
 }
 
-// =====================================
-// NAVEGAR MES ANTERIOR
-// =====================================
 function prevCalendarMonth() {
     calendarMonth--;
     if (calendarMonth < 0) {
@@ -207,9 +190,6 @@ function prevCalendarMonth() {
     generateCalendar();
 }
 
-// =====================================
-// NAVEGAR MES SIGUIENTE
-// =====================================
 function nextCalendarMonth() {
     calendarMonth++;
     if (calendarMonth > 11) {
@@ -220,7 +200,7 @@ function nextCalendarMonth() {
 }
 
 // =====================================
-// GENERAR CATÁLOGO DE CANCHAS
+// CATÁLOGO DE CANCHAS
 // =====================================
 function generateCanchasGrid() {
     const canchas = [
@@ -282,91 +262,247 @@ function generateCanchasGrid() {
 }
 
 // =====================================
-// ABRIR MODAL DE HORARIOS
+// FUNCIONES DEL CARRITO DE RESERVAS
+// =====================================
+
+function agregarReserva(canchaId, canchaNombre, hora, precioHora) {
+    const existe = reservas.some(r => r.canchaId === canchaId && r.hora === hora);
+    if (!existe) {
+        reservas.push({ canchaId, canchaNombre, hora, precioHora });
+    }
+    renderizarCarrito();
+    actualizarTotalesCanchas();
+    enablePayButton();
+}
+
+function eliminarReserva(canchaId, hora) {
+    reservas = reservas.filter(r => !(r.canchaId === canchaId && r.hora === hora));
+    renderizarCarrito();
+    actualizarTotalesCanchas();
+    desmarcarBotonHora(canchaId, hora);
+    enablePayButton();
+}
+
+function renderizarCarrito() {
+    const contenedor = document.getElementById('listaReservas');
+    if (!contenedor) return;
+    
+    if (reservas.length === 0) {
+        contenedor.innerHTML = '<div class="text-center text-gray-500 py-4 text-sm">Aún no has seleccionado ninguna cancha.</div>';
+        return;
+    }
+
+    let html = '';
+    reservas.forEach(res => {
+        html += `
+            <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200 shadow-sm">
+                <div class="flex-1">
+                    <span class="font-bold text-emerald-700">${res.canchaNombre}</span>
+                    <span class="text-gray-900 mx-1">•</span>
+                    <span class="font-semibold">${res.hora}</span>
+                    <span class="text-gray-600 text-sm ml-2">S/ ${res.precioHora}</span>
+                </div>
+                <button onclick="eliminarReserva(${res.canchaId}, '${res.hora}')" 
+                        class="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition"
+                        title="Eliminar reserva">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+    });
+    contenedor.innerHTML = html;
+}
+
+function desmarcarBotonHora(canchaId, hora) {
+    const modalVisible = !document.getElementById('horarioModal').classList.contains('hidden');
+    if (modalVisible && currentCancha === canchaId) {
+        const botones = document.querySelectorAll('.hourButton.available');
+        botones.forEach(btn => {
+            if (btn.getAttribute('data-hora') === hora) {
+                btn.classList.remove('border-emerald-600', 'border-2', 'bg-emerald-500', 'text-white', 'hover:bg-emerald-600');
+                btn.classList.add('border-emerald-200', 'text-gray-900');
+                const p = btn.querySelector('p');
+                if (p) {
+                    p.classList.remove('text-white', 'font-black');
+                    p.classList.add('text-gray-900');
+                }
+            }
+        });
+    }
+}
+
+function actualizarTotalesCanchas() {
+    const totalHoras = reservas.length;
+    const subtotal = reservas.reduce((acc, r) => acc + r.precioHora, 0);
+    
+    document.getElementById('cantidadHoras').textContent = totalHoras;
+    document.getElementById('subtotalCanchas').textContent = `S/ ${subtotal}`;
+    
+    const totalGeneral = subtotal + beerTotal;
+    document.getElementById('detallePrecio').textContent = `S/ ${totalGeneral}`;
+    document.getElementById('detalleCervezasResumen').textContent = `S/ ${beerTotal}`;
+}
+
+// =====================================
+// CERVEZAS
+// =====================================
+function updateBeerTotal() {
+    const beerSelect = document.getElementById('beerBrand');
+    const beerQtyInput = document.getElementById('beerQuantity');
+    
+    if (beerSelect && beerQtyInput) {
+        beerPricePerBox = parseInt(beerSelect.value);
+        beerQuantity = parseInt(beerQtyInput.value) || 0;
+        if (beerQuantity < 0) beerQuantity = 0;
+        beerTotal = beerPricePerBox * beerQuantity;
+        
+        const subtotalEl = document.getElementById('beerSubtotal');
+        if (subtotalEl) subtotalEl.textContent = `S/ ${beerTotal}`;
+    }
+    actualizarTotalesCanchas();
+}
+
+function resetBeerSelection() {
+    const beerSelect = document.getElementById('beerBrand');
+    const beerQtyInput = document.getElementById('beerQuantity');
+    if (beerSelect) beerSelect.value = '50';
+    if (beerQtyInput) beerQtyInput.value = 0;
+    beerPricePerBox = 50;
+    beerQuantity = 0;
+    beerTotal = 0;
+    
+    const subtotalEl = document.getElementById('beerSubtotal');
+    if (subtotalEl) subtotalEl.textContent = 'S/ 0';
+    actualizarTotalesCanchas();
+}
+
+// =====================================
+// MODAL DE HORARIOS
 // =====================================
 function openHorarioModal(canchaId, canchaNombre, precio) {
     currentCancha = canchaId;
     currentPrecio = precio;
-    selectedHora = null;
+    currentCanchaNombre = canchaNombre;
+    
     document.getElementById('modalTitle').textContent = canchaNombre;
+    document.getElementById('modalCanchaNombre').textContent = canchaNombre;
+    
+    resetBeerSelection();
+    generarBotonesHorario();
+    marcarBotonesSeleccionados();
+    renderizarCarrito();
+    actualizarTotalesCanchas();
+    
     document.getElementById('horarioModal').classList.remove('hidden');
-    document.getElementById('pagarBtn').disabled = true;
-    document.querySelectorAll('.hourButton').forEach(btn => {
-        btn.classList.remove('border-emerald-600', 'bg-emerald-100');
-        if (!btn.classList.contains('booked')) {
-            btn.classList.add('border-emerald-200');
+    enablePayButton();
+}
+
+function generarBotonesHorario() {
+    const contenedor = document.getElementById('horarioButtonsContainer');
+    const horarios = [
+        { hora: '08:00', estado: 'available' },
+        { hora: '09:00', estado: 'available' },
+        { hora: '10:00', estado: 'booked' },
+        { hora: '11:00', estado: 'available' },
+        { hora: '14:00', estado: 'available' },
+        { hora: '15:00', estado: 'available' },
+        { hora: '16:00', estado: 'booked' },
+        { hora: '17:00', estado: 'available' }
+    ];
+    
+    let html = '';
+    horarios.forEach(h => {
+        const disponible = h.estado === 'available';
+        const clases = disponible 
+            ? 'hourButton available p-5 border-2 border-emerald-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50 transition cursor-pointer duration-200' 
+            : 'hourButton booked p-5 border-2 border-red-200 rounded-xl bg-red-50 cursor-not-allowed opacity-60';
+        
+        const contenido = disponible
+            ? `<p class="font-black text-gray-900 text-xl">${h.hora}</p>`
+            : `<p class="font-black text-red-600 text-xl">${h.hora}</p><p class="text-xs text-red-600">Ocupado</p>`;
+        
+        html += `<button class="${clases}" data-hora="${h.hora}" data-cancha-id="${currentCancha}" data-cancha-nombre="${currentCanchaNombre}" data-precio="${currentPrecio}" ${!disponible ? 'disabled' : ''}>
+                    ${contenido}
+                </button>`;
+    });
+    contenedor.innerHTML = html;
+    
+    document.querySelectorAll('.hourButton.available').forEach(btn => {
+        btn.removeEventListener('click', manejarClickHora);
+        btn.addEventListener('click', manejarClickHora);
+    });
+}
+
+function manejarClickHora(event) {
+    const btn = event.currentTarget;
+    const hora = btn.getAttribute('data-hora');
+    const canchaId = parseInt(btn.getAttribute('data-cancha-id'));
+    const canchaNombre = btn.getAttribute('data-cancha-nombre');
+    const precio = parseInt(btn.getAttribute('data-precio'));
+    
+    const existe = reservas.some(r => r.canchaId === canchaId && r.hora === hora);
+    
+    if (existe) {
+        eliminarReserva(canchaId, hora);
+    } else {
+        agregarReserva(canchaId, canchaNombre, hora, precio);
+        btn.classList.remove('border-emerald-200', 'text-gray-900');
+        btn.classList.add('border-emerald-600', 'border-2', 'bg-emerald-500', 'text-white', 'hover:bg-emerald-600');
+        const p = btn.querySelector('p');
+        if (p) {
+            p.classList.remove('text-gray-900');
+            p.classList.add('text-white', 'font-black');
+        }
+    }
+}
+
+function marcarBotonesSeleccionados() {
+    const botones = document.querySelectorAll('.hourButton.available');
+    botones.forEach(btn => {
+        const hora = btn.getAttribute('data-hora');
+        const existe = reservas.some(r => r.canchaId === currentCancha && r.hora === hora);
+        if (existe) {
+            btn.classList.remove('border-emerald-200', 'text-gray-900');
+            btn.classList.add('border-emerald-600', 'border-2', 'bg-emerald-500', 'text-white', 'hover:bg-emerald-600');
+            const p = btn.querySelector('p');
+            if (p) {
+                p.classList.remove('text-gray-900');
+                p.classList.add('text-white', 'font-black');
+            }
+        } else {
+            btn.classList.remove('border-emerald-600', 'border-2', 'bg-emerald-500', 'text-white', 'hover:bg-emerald-600');
+            btn.classList.add('border-emerald-200', 'text-gray-900');
+            const p = btn.querySelector('p');
+            if (p) {
+                p.classList.remove('text-white', 'font-black');
+                p.classList.add('text-gray-900');
+            }
         }
     });
 }
 
-// =====================================
-// CERRAR MODAL DE HORARIOS
-// =====================================
 function closeHorarioModal() {
     document.getElementById('horarioModal').classList.add('hidden');
 }
 
 // =====================================
-// SELECCIONAR HORARIO
-// =====================================
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.hourButton.available').forEach(button => {
-        button.addEventListener('click', function() {
-            document.querySelectorAll('.hourButton').forEach(btn => {
-                btn.classList.remove('border-emerald-600', 'bg-emerald-100');
-                if (!btn.classList.contains('booked')) {
-                    btn.classList.add('border-emerald-200');
-                }
-            });
-
-            this.classList.add('border-emerald-600', 'bg-emerald-100');
-            selectedHora = this.getAttribute('data-hora');
-
-            const horaInt = parseInt(selectedHora.split(':')[0]);
-            document.getElementById('detalleHora').textContent = `${selectedHora} - ${String(horaInt + 1).padStart(2, '0')}:00`;
-            document.getElementById('detallePrecio').textContent = `S/ ${currentPrecio}`;
-
-            enablePayButton();
-        });
-    });
-
-    // =====================================
-    // SELECCIONAR MÉTODO DE PAGO
-    // =====================================
-    document.querySelectorAll('.paymentMethod').forEach(method => {
-        method.addEventListener('click', function() {
-            document.querySelectorAll('.paymentMethod div').forEach(m => {
-                m.classList.remove('border-emerald-600', 'bg-emerald-50');
-                m.classList.add('border-gray-200');
-            });
-            this.querySelector('div').classList.add('border-emerald-600', 'bg-emerald-50');
-            this.querySelector('div').classList.remove('border-gray-200');
-            enablePayButton();
-        });
-    });
-
-    document.getElementById('acceptTerms')?.addEventListener('change', enablePayButton);
-});
-
-// =====================================
-// HABILITAR BOTÓN PAGAR
+// PAGO
 // =====================================
 function enablePayButton() {
     const btn = document.getElementById('pagarBtn');
     const terms = document.getElementById('acceptTerms');
-    if (terms?.checked && selectedHora) {
+    if (terms?.checked && reservas.length > 0) {
         btn.disabled = false;
     } else {
         btn.disabled = true;
     }
 }
 
-// =====================================
-// PROCESAR PAGO
-// =====================================
 function procesarPago() {
-    if (!selectedHora) {
-        alert('Por favor selecciona un horario');
+    if (reservas.length === 0) {
+        alert('Por favor selecciona al menos un horario');
         return;
     }
 
@@ -379,31 +515,83 @@ function procesarPago() {
         'transfer': 'Transferencia Bancaria',
         'cash': 'Efectivo'
     };
-
     const methodName = paymentNames[paymentMethod] || 'Desconocido';
-    alert(`✓ ¡Reserva confirmada!\n\nCancha: ${document.getElementById('modalTitle').textContent}\nHorario: ${document.getElementById('detalleHora').textContent}\nTotal: ${document.getElementById('detallePrecio').textContent}\nMétodo: ${methodName}`);
+
+    const subtotalCanchas = reservas.reduce((acc, r) => acc + r.precioHora, 0);
+    const totalGeneral = subtotalCanchas + beerTotal;
     
+    let detalleReservas = '';
+    reservas.forEach(r => {
+        detalleReservas += `\n   • ${r.canchaNombre} - ${r.hora} (S/ ${r.precioHora})`;
+    });
+    
+    let mensajeCervezas = '';
+    if (beerQuantity > 0) {
+        mensajeCervezas = `\n🍺 Cervezas: ${beerQuantity} caja${beerQuantity !== 1 ? 's' : ''} (S/ ${beerTotal})`;
+    }
+
+    alert(`✅ ¡Reserva confirmada!\n\n` +
+          `🏟️ Canchas reservadas:${detalleReservas}\n` +
+          `━━━━━━━━━━━━━━━━\n` +
+          `Subtotal canchas: S/ ${subtotalCanchas}${mensajeCervezas}\n` +
+          `💵 TOTAL: S/ ${totalGeneral}\n` +
+          `💳 Método: ${methodName}\n\n` +
+          `📅 Fecha: ${userPreferences.date || 'No especificada'}\n` +
+          `🕐 Horario preferido: ${userPreferences.hour || '--:--'}\n` +
+          `📍 Ciudad: ${userPreferences.city || 'No especificada'}`);
+    
+    // Limpiar carrito después del pago
+    reservas = [];
+    renderizarCarrito();
+    actualizarTotalesCanchas();
     closeHorarioModal();
 }
 
 // =====================================
-// ABRIR MODAL DE FILTROS
+// FILTROS
 // =====================================
 function openFilterModal() {
     document.getElementById('filterModal').classList.remove('hidden');
 }
 
-// =====================================
-// CERRAR MODAL DE FILTROS
-// =====================================
 function closeFilterModal() {
     document.getElementById('filterModal').classList.add('hidden');
 }
 
-// =====================================
-// APLICAR FILTROS
-// =====================================
 function applyFilters() {
     alert('✓ Filtros aplicados correctamente');
     closeFilterModal();
 }
+
+// =====================================
+// EVENT LISTENERS INICIALES
+// =====================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Métodos de pago
+    document.querySelectorAll('.paymentMethod').forEach(method => {
+        method.addEventListener('click', function() {
+            document.querySelectorAll('.paymentMethod div').forEach(m => {
+                m.classList.remove('border-emerald-600', 'bg-emerald-50');
+                m.classList.add('border-gray-200');
+            });
+            this.querySelector('div').classList.add('border-emerald-600', 'bg-emerald-50');
+            this.querySelector('div').classList.remove('border-gray-200');
+            enablePayButton();
+        });
+    });
+
+    // Términos y condiciones
+    document.getElementById('acceptTerms')?.addEventListener('change', enablePayButton);
+
+    // Cervezas
+    const beerSelect = document.getElementById('beerBrand');
+    const beerQtyInput = document.getElementById('beerQuantity');
+    if (beerSelect) beerSelect.addEventListener('change', updateBeerTotal);
+    if (beerQtyInput) {
+        beerQtyInput.addEventListener('input', function() {
+            if (this.value < 0) this.value = 0;
+            if (this.value > 20) this.value = 20;
+            updateBeerTotal();
+        });
+    }
+});
