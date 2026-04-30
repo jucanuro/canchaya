@@ -1,26 +1,164 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Canchaya - Reserva tu pasión{% endblock %}</title>
+    <title>{% block title %}Canchaya | Powered by Vertex Quant Labs{% endblock %}</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f8fff9;
+            color: #0f172a;
+        }
+
+        input,
+        select,
+        button {
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        button:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .page-bg {
+            background:
+                radial-gradient(circle at 12% 18%, rgba(34, 197, 94, .18), transparent 28%),
+                radial-gradient(circle at 88% 12%, rgba(16, 185, 129, .16), transparent 26%),
+                radial-gradient(circle at 50% 100%, rgba(132, 204, 22, .14), transparent 30%),
+                linear-gradient(135deg, #ffffff 0%, #f7fff8 45%, #ecfdf5 100%);
+        }
+
+        .soft-grid {
+            background-image:
+                linear-gradient(rgba(15, 23, 42, .045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, .045) 1px, transparent 1px);
+            background-size: 42px 42px;
+        }
+
+        .glass-white {
+            background: rgba(255, 255, 255, .78);
+            border: 1px solid rgba(15, 23, 42, .08);
+            backdrop-filter: blur(24px);
+            box-shadow: 0 24px 80px -42px rgba(15, 23, 42, .35);
+        }
+
+        .field-card {
+            background: rgba(255, 255, 255, .86);
+            border: 1px solid rgba(15, 23, 42, .08);
+            transition: all .25s ease;
+        }
+
+        .field-card:hover,
+        .field-card:focus-within {
+            border-color: rgba(16, 185, 129, .55);
+            box-shadow: 0 18px 40px -30px rgba(16, 185, 129, .8);
+            transform: translateY(-1px);
+        }
+
+        .floating-ball {
+            position: absolute;
+            display: grid;
+            place-items: center;
+            color: rgba(16, 185, 129, .18);
+            animation: floatBall 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-ball:nth-child(2) {
+            animation-delay: -2s;
+        }
+
+        .floating-ball:nth-child(3) {
+            animation-delay: -4s;
+        }
+
+        .floating-ball:nth-child(4) {
+            animation-delay: -6s;
+        }
+
+        @keyframes floatBall {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-18px) rotate(12deg);
+            }
+        }
+
+        .scroll-soft::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .scroll-soft::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, .55);
+            border-radius: 999px;
+        }
+
+        .chip-option input:checked + span {
+            background: linear-gradient(135deg, #10b981, #84cc16);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 18px 40px -24px rgba(16, 185, 129, .9);
+        }
+
+        .time-chip input:checked + span {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: rgba(16, 185, 129, .65);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: .65;
+            cursor: pointer;
+        }
     </style>
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
-    
-    {% include 'header.html' %}
 
-    <main class="flex-grow">
-        {% block content %}
-        {% endblock %}
-    </main>
+<body class="min-h-screen overflow-x-hidden">
+    {% block content %}{% endblock %}
 
-    {% include 'footer.html' %}
+    <script>
+        function usarMiUbicacion() {
+            if (!navigator.geolocation) {
+                alert("Tu navegador no permite ubicación.");
+                return;
+            }
 
+            navigator.geolocation.getCurrentPosition(
+                () => {
+                    const input = document.getElementById('ubicacion');
+                    if (input) input.value = "Usando mi ubicación actual";
+                },
+                () => alert("No se pudo obtener tu ubicación.")
+            );
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
